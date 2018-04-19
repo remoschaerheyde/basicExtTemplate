@@ -1,0 +1,23 @@
+{
+    "compileOnSave": true,
+    "exclude": [
+      ".vscode",
+      "node_modules"
+    ],
+    "compilerOptions": {
+      "module": "umd",
+      "noEmitOnError": true,
+      "noImplicitAny": false,
+      "removeComments": false,
+      "outDir": "./src/js",
+      "sourceMap": true,
+      "target": "es5",
+      "lib": [
+        "dom",
+        "es5",
+        "es2015.promise",
+        "es2015.iterable",
+        "scripthost"
+      ]
+    }
+  }

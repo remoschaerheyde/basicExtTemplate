@@ -1,0 +1,15 @@
+{
+    "name": "_hyExtTemp",
+    "description": "",
+    "type": "visualization",
+    "icon": "filterpane",
+    "version": "0.0.1",
+    "author": "",
+    "homepage": "",
+    "keywords": "qlik-sense, visualization",
+    "license": "MIT",
+    "repository": "",
+    "dependencies": {
+        "qlik-sense": ">=3.2.x"
+    }
+} 
