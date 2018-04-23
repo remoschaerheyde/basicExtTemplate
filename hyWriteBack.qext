@@ -1,5 +1,5 @@
 {
-    "name": "_hyExtTemp",
+    "name": "_hyWriteBack",
     "description": "",
     "type": "visualization",
     "icon": "filterpane",

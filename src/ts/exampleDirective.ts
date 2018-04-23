@@ -3,8 +3,6 @@ import * as template from "text!../templates/exampleDirective.html";
 
 class ExampleController implements ng.IController {
 
-    private test:string = 'heeeelloooo';
-
     private _model: EngineAPI.IGenericObject;
     get model(): EngineAPI.IGenericObject {
         console.log('getter');
@@ -30,10 +28,10 @@ class ExampleController implements ng.IController {
         }
     }
   
-    static $inject = ["$timeout", "$element", "$scope"];
+    static $inject = ["$timeout", "$element", "$scope", "$http"];
 
-    constructor(timeout: ng.ITimeoutService, element: JQuery, scope: ng.IScope) {
-        console.log("run constructor of Directive Controller");
+    constructor(timeout: ng.ITimeoutService, element: JQuery, scope: ng.IScope, http: ng.IHttpProvider) {
+        console.log('heeeeeeeeeeeeeeeeeeeeeeeeeellloooo');
     }
 }
 
