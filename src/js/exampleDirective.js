@@ -11,36 +11,32 @@
     Object.defineProperty(exports, "__esModule", { value: true });
     var template = require("text!../templates/exampleDirective.html");
     var ExampleController = /** @class */ (function () {
-        function ExampleController(timeout, element, scope) {
-            this.test = 'heeeelloooo';
-            console.log("run constructor of Directive Controller");
+        function ExampleController(timeout, element, scope, http) {
+            console.log('constructor');
         }
         Object.defineProperty(ExampleController.prototype, "model", {
             get: function () {
-                console.log('getter');
-                console.log(this._model);
                 return this._model;
             },
-            set: function (value) {
-                console.log('setter');
-                if (value !== this._model) {
-                    try {
-                        this._model = value;
-                        var that = this;
-                        value.on("changed", function () {
-                            console.log('value changed');
-                        });
-                        value.emit("changed");
-                    }
-                    catch (e) {
-                        console.error("error", e);
-                    }
-                }
+            set: function (v) {
+                this._model = v;
+                this.modelChanged();
             },
             enumerable: true,
             configurable: true
         });
-        ExampleController.$inject = ["$timeout", "$element", "$scope"];
+        ExampleController.prototype.modelChanged = function () {
+            console.log('hello');
+            var that = this;
+            var hyperCubeDef;
+            if (that._model) {
+                this._model.on("changed", function () {
+                    console.log('changed');
+                });
+                that._model.emit("changed");
+            }
+        };
+        ExampleController.$inject = ["$timeout", "$element", "$scope", "$http"];
         return ExampleController;
     }());
     function ExampleDirectiveFactory() {

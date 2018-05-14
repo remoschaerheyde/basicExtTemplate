@@ -15,8 +15,8 @@
             qMeasures: [],
             qInitialDataFetch: [
                 {
-                    qWidth: 10,
-                    qHeight: 100
+                    qWidth: 0,
+                    qHeight: 0
                 }
             ]
         }

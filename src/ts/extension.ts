@@ -2,7 +2,7 @@
 import * as qvangular from "qvangular";
 import * as qlik from "qlik";
 import * as template from "text!../templates/exampleExtension.html";
-import { ExampleDirectiveFactory } from "./exampleDirective";
+import { ExampleDirectiveFactory } from "./hyCommentTbl";
 import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import {registerDirective} from "./ngRegister";
 import extDefinition from "./definition"
@@ -37,6 +37,8 @@ export = {
     controller: ["$scope", function (scope: utils.IVMScope<ExampleExtension>) {
         console.log("run controller of Extension")
         scope.vm = new ExampleExtension(utils.getEnigma(scope));
+
+        
     }]
 };
 

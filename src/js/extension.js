@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "qvangular", "qlik", "text!../templates/exampleExtension.html", "./exampleDirective", "../../node_modules/davinci.js/dist/umd/daVinci", "./ngRegister", "./definition", "./initProps"], factory);
+        define(["require", "exports", "qvangular", "qlik", "text!../templates/exampleExtension.html", "./hyCommentTbl", "../../node_modules/davinci.js/dist/umd/daVinci", "./ngRegister", "./definition", "./initProps"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -12,13 +12,13 @@
     var qvangular = require("qvangular");
     var qlik = require("qlik");
     var template = require("text!../templates/exampleExtension.html");
-    var exampleDirective_1 = require("./exampleDirective");
+    var hyCommentTbl_1 = require("./hyCommentTbl");
     var daVinci_1 = require("../../node_modules/davinci.js/dist/umd/daVinci");
     var ngRegister_1 = require("./ngRegister");
     var definition_1 = require("./definition");
     var initProps_1 = require("./initProps");
     qvangular.service("$registrationProvider", daVinci_1.services.RegistrationProvider).implementObject(qvangular);
-    ngRegister_1.registerDirective(qvangular, exampleDirective_1.ExampleDirectiveFactory(), "hyDirOne");
+    ngRegister_1.registerDirective(qvangular, hyCommentTbl_1.ExampleDirectiveFactory(), "hyDirOne");
     var ExampleExtension = /** @class */ (function () {
         function ExampleExtension(model) {
             console.log("constructor of ExampleExtension");
