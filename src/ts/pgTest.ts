@@ -130,8 +130,6 @@ class CommentTblCntrl implements ng.IController {
           })  
         })
 
-      
-      
     }).catch(err => console.log('could not get comment data from api'))
   }
 
