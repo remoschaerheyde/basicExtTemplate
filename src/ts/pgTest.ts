@@ -1,5 +1,5 @@
 import { utils } from "../../node_modules/davinci.js/dist/umd/daVinci";
-import * as template from "text!../templates/hyCommentTbl.html";
+import * as template from "text!../templates/pgTest.html";
 import "css!../css/hyCommentTbl.css";
 
 interface IQVAngular {
@@ -28,6 +28,7 @@ class CommentTblCntrl implements ng.IController {
   private globalObj: any;
   private extId: string;
   private extCubeWidth: number;
+  private cubeWidth:number;
 
   private _editMode: boolean;
   get editMode() {
@@ -58,12 +59,10 @@ class CommentTblCntrl implements ng.IController {
         // ========== Creating dynamic hypercube ==========//
         that._model
           .getProperties()
-          .then((extProps: EngineAPI.IGenericObjectProperties) => {
-            hyperCubeDef = extProps.qHyperCubeDef;
-
-            that.extCubeWidth =
-              extProps.qHyperCubeDef.qDimensions.length +
-              extProps.qHyperCubeDef.qMeasures.length;
+          .then((sessionObjProps: EngineAPI.IGenericObjectProperties) => {
+            hyperCubeDef = sessionObjProps.qHyperCubeDef;
+            
+            that.extCubeWidth = sessionObjProps.qHyperCubeDef.qDimensions.length + sessionObjProps.qHyperCubeDef.qMeasures.length;
 
             let nxPage: EngineAPI.INxPage = {
               qLeft: 0,
@@ -86,6 +85,7 @@ class CommentTblCntrl implements ng.IController {
   private _matrixData: EngineAPI.INxCellRows[];
 
   private _dimensionsInfo: any;
+  private _genericObjectId: string;
   public get dimensionsInfo(): any {
     return this._dimensionsInfo;
   }
@@ -105,42 +105,62 @@ class CommentTblCntrl implements ng.IController {
     this._maxY = v;
   }
 
+  private getDbComments = function(customHyperCubeLayout) {
+    console.log('get comments from db');
+    let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
+
+    this.http({
+      url: "http://localhost:5000",
+      method: "POST",
+      data: { comments: JSON.stringify(comments) },
+      headers: { "Content-Type": "application/json" }
+    }).then(res => {
+   
+        this._model.app.getObject(this._genericObjectId).then((sessionObj:EngineAPI.IGenericObjectProperties) => {
+
+          sessionObj.getProperties().then(sessionObjProps => {
+            sessionObjProps.qHyperCubeDef.hyComments = res.data
+            sessionObj.setProperties(sessionObjProps).then(() => {
+              sessionObj.getLayout().then(newCubeLayoutWithComments => {
+                
+                this.setData(newCubeLayoutWithComments.qHyperCube);
+                
+              })
+            })
+          })  
+        })
+
+      
+      
+    }).catch(err => console.log('could not get comment data from api'))
+  }
+
   private setData(hyperCube: EngineAPI.IHyperCube) {
     // set Hypercube Matrix Data
+   
     let that:any = this;
-    console.log(hyperCube.qDataPages);
-
-    let addCommentsToCube = function() {
-        
-        return new Promise((resolve, reject) => {
-
-            that.http({
-                    url: "http://localhost:3000/comments/addCommentsToCube",
-                    method: "POST",
-                    data: { matrix: hyperCube.qDataPages[0].qMatrix, commentSeparator: that.commentSeparator},
-                    headers: { "Content-Type": "application/json" }
-            }).then(matrixData => {
-                resolve(matrixData.data);
-            });
-        }) 
-    }
-
-
-    let addCubeToScope = (newMatrix) => {
-        return new Promise((resolve,reject) => {
-
-            console.log(newMatrix);
             if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
-                
-                //this._matrixData = hyperCube.qDataPages[0].qMatrix;
-                this._matrixData = newMatrix
-          
-                console.log(this);
-                // create comment key ==========================
+
+              // determine cube width
+              this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length
+            
+
+              hyperCube.qDataPages[0].qMatrix.forEach((row:any) => row.push({qText: ""}));
+                // add comment field
+
+              (hyperCube as any).hyComments.forEach(comment => {
+                  (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).splice(-1,1);
+                  (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).push({qText: comment.comment})
+              });
+
+              this._matrixData = hyperCube.qDataPages[0].qMatrix;
+              
               } else {
                 this._matrixData = [];
               }
+
           
+
               // set Dimension Information
               if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
                 this._dimensionsInfo = hyperCube.qDimensionInfo;
@@ -155,18 +175,9 @@ class CommentTblCntrl implements ng.IController {
               } else {
                 this.maxY = 0;
               }
-              resolve();
-        })
-    }
-
-    addCommentsToCube().then(addCubeToScope)
-
-
-
   }
-
   // =================== Destory session object ============================================= //
-  private _genericObjectId: string;
+  
   private destroySessionObject() {
     let that = this;
     if (that._genericObjectId !== undefined) {
@@ -179,18 +190,13 @@ class CommentTblCntrl implements ng.IController {
     }
   }
 
-  // ================== add comments to hypercube ========================================== //
-
   // =================== Create session object ============================================= //
 
   private createSessionObject() {
     let that = this;
 
     let hyperCubeProp: EngineAPI.IGenericObjectProperties = {
-      qInfo: {
-        qId: "",
-        qType: "HyperCube"
-      },
+      qInfo: {qId: "",qType: "HyperCube"},
       qHyperCubeDef: this._hyperCubeDef
     };
 
@@ -198,33 +204,40 @@ class CommentTblCntrl implements ng.IController {
       .createObject(hyperCubeProp)
       .then((genericObject: EngineAPI.IGenericObject) => {
         this._genericObjectId = genericObject.id;
-
-        genericObject
-          .getLayout()
-          .then((genHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
-            that.setData(genHyperCubeLayout.qHyperCube);
-          });
+      
+        let rowKeys;
+          genericObject.getLayout().then((genHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
+              console.log(genHyperCubeLayout);
+              rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex) => {
+              return {tableRowKey: row.map(rowItem => rowItem.qText).join('|'), tableRowIndex: rowIndex };
+            })
+          }).then(() => {
+            genericObject.getProperties().then((genObjProps:EngineAPI.IGenericObjectProperties) => {
+              genObjProps.qHyperCubeDef.hyRowKeys = rowKeys;
+              genericObject.setProperties(genObjProps).then(() => {
+                genericObject.getLayout().then((customHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
+              
+                    that.getDbComments(customHyperCubeLayout)
+                    
+                 })
+              })
+            })
+          })
       });
   }
 
   // CREATE DIMENSION KEY ===================================================================================
 
-  private _keySelectedComment;
 
-  private createDimKey(tableRow: { qText: string }[]) {
-    let selectedDimensions: string[] = tableRow.map(
-      cellValue => cellValue.qText
-    );
-    let key: string = selectedDimensions.join(this.commentSeparator);
-    this._keySelectedComment = key;
+  private _tblRowSelected;
+  private getRowIndex(row, index) {
+    this._tblRowSelected = index;
+
+    console.log(index);
+    
   }
 
-  private editComment(tableRow: { qText: string }[]) {
-    if (!this._editMode) {
-      this.createDimKey(tableRow);
-      console.log(this);
-    }
-  }
+
 
   // GET COMMENTS ============================================================================================
 
@@ -233,7 +246,7 @@ class CommentTblCntrl implements ng.IController {
       let key: string = this._keySelectedComment;
 
       this.http({
-        url: "http://localhost:3000/comments/getcomment",
+        url: "http://localhost:4000/comments/getcomment",
         method: "POST",
         data: { key: key },
         headers: { "Content-Type": "application/json" }
@@ -245,114 +258,50 @@ class CommentTblCntrl implements ng.IController {
 
   // POST COMMENT ============================================================================================
 
-  createCommentFromScope = function() {
-    if (this._keySelectedComment && this.textAreaComment) {
-      // Dimension key
-      let dimKey: string = this._keySelectedComment;
-      // author
-      let author: string = this._user;
-      // Comment
-      let textAreaComment: string = this.textAreaComment;
 
-      let dimensions: string = this._dimensionsInfo
-        .map(dim => dim.qFallbackTitle)
-        .join(this.commentSeparator);
-
-      return new Comment(dimKey, author, textAreaComment, dimensions);
-    } else {
-      console.log("information is missing");
-    }
-  };
 
   private postComment = function() {
-    let comment = this.createCommentFromScope();
-    if (comment) {
-      console.log(comment);
+      
+
+      console.log('posting comment');
       this.http({
-        url: "http://localhost:3000/comments/add",
+        url: "http://localhost:5000",
         method: "POST",
-        data: { comment: comment },
+        data: { comment: 'hello' },
         headers: { "Content-Type": "application/json" }
       }).then(res => {
         console.log("Comment succesfully added");
-        this._model.emit("changed");
-
-
+        
       });
-    }
-  };
-
-  // UI HELPERS =======================================================
-
-  private state: any = { selected: undefined };
-
-  private commentSelToggle = function(index) {
-    this.state.selected = this.state.selected != index ? index : undefined;
   };
 
   // ============================ Retrieving comments =================
 
-  private retrieveComments = function() {
+  private getAllComments = function() {
     this.http({
-      url: "http://localhost:3000/comments/retrieveAll",
+      url: "http://localhost:4000/comments/getAll",
       method: "GET"
     }).then(comments => {
-      this._model.app.getObject(this.extId).then(extObj => {
-        extObj.getProperties().then(extProps => {
-          extProps.hComments = comments.data;
-          console.log(extProps);
-          extObj.setProperties(extProps).then(() => {
-            extObj.getLayout();
-          });
-        });
-      });
+      console.log(comments);
     });
   };
 
   // =======================================================================
 
   private clearDb = function() {
-    console.log("test");
     this.http({
-      url: "http://localhost:3000/comments/clearDb",
+      url: "http://localhost:4000/comments/clearDb",
       method: "GET"
     }).then(res => {
       console.log(res);
     });
   };
 
-  // dev functions ============================================================
-
-  private getExtProps = function() {
-    this._model.app.getObject(this.extId).then(extObj => {
-      console.log(extObj);
-    });
-  };
-
-
-  private reload = function() {
-    this._model.app.doReload(0,true,false).then((res) => {
-        this._model.app.getAppLayout().then(layout => {
-            this._model.app.resume().then(() => {
-
-                console.log('resuming app');
-            } )
-        })
-    }
-)
- 
-  };
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];
 
-  constructor(
-    timeout: ng.ITimeoutService,
-    element: JQuery,
-    scope: ng.IScope,
-    private http: ng.IHttpProvider,
-    private _user: string
-  ) {
+  constructor(timeout: ng.ITimeoutService, element: JQuery, scope: ng.IScope, private http: ng.IHttpProvider, private _user: string) {
     const that: any = this;
 
     this.globalObj = that._model.session.app.global;
@@ -369,11 +318,7 @@ class CommentTblCntrl implements ng.IController {
 
 export function ExampleDirectiveFactory(): ng.IDirectiveFactory {
   "use strict";
-  return (
-    $document: ng.IAugmentedJQuery,
-    $injector: ng.auto.IInjectorService,
-    $registrationProvider: any
-  ) => {
+  return ($document: ng.IAugmentedJQuery, $injector: ng.auto.IInjectorService, $registrationProvider: any) => {
     return {
       restrict: "E",
       replace: true,

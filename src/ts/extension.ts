@@ -1,8 +1,8 @@
 //#region Imports
 import * as qvangular from "qvangular";
 import * as qlik from "qlik";
-import * as template from "text!../templates/exampleExtension.html";
-import { ExampleDirectiveFactory } from "./hyCommentTbl";
+import * as template from "text!../templates/extension.html";
+import { ExampleDirectiveFactory } from "./pgTest";
 import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import {registerDirective} from "./ngRegister";
 import extDefinition from "./definition"
@@ -10,7 +10,7 @@ import initProps from "./initProps"
 
 qvangular.service<services.IRegistrationProvider>("$registrationProvider", services.RegistrationProvider).implementObject(qvangular);
 
-registerDirective(qvangular, ExampleDirectiveFactory(), "hyDirOne")
+registerDirective(qvangular, ExampleDirectiveFactory(), "pgTest")
 
 class ExampleExtension {
 

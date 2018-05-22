@@ -4,12 +4,12 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "text!../templates/hyCommentTbl.html", "css!../css/hyCommentTbl.css"], factory);
+        define(["require", "exports", "text!../templates/pgTest.html", "css!../css/hyCommentTbl.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var template = require("text!../templates/hyCommentTbl.html");
+    var template = require("text!../templates/pgTest.html");
     require("css!../css/hyCommentTbl.css");
     var Comment = /** @class */ (function () {
         function Comment(dimKey, author, comment, dimensions) {
@@ -32,12 +32,34 @@
             this.http = http;
             this._user = _user;
             this.commentSeparator = "|#£?|";
+            this.getDbComments = function (customHyperCubeLayout) {
+                var _this = this;
+                console.log('get comments from db');
+                var comments = customHyperCubeLayout.qHyperCube.hyRowKeys;
+                this.http({
+                    url: "http://localhost:5000",
+                    method: "POST",
+                    data: { comments: JSON.stringify(comments) },
+                    headers: { "Content-Type": "application/json" }
+                }).then(function (res) {
+                    _this._model.app.getObject(_this._genericObjectId).then(function (sessionObj) {
+                        sessionObj.getProperties().then(function (sessionObjProps) {
+                            sessionObjProps.qHyperCubeDef.hyComments = res.data;
+                            sessionObj.setProperties(sessionObjProps).then(function () {
+                                sessionObj.getLayout().then(function (newCubeLayoutWithComments) {
+                                    _this.setData(newCubeLayoutWithComments.qHyperCube);
+                                });
+                            });
+                        });
+                    });
+                }).catch(function (err) { return console.log('could not get comment data from api'); });
+            };
             // GET COMMENTS ============================================================================================
             this.getSelectedComments = function () {
                 if (this._keySelectedComment) {
                     var key = this._keySelectedComment;
                     this.http({
-                        url: "http://localhost:3000/comments/getcomment",
+                        url: "http://localhost:4000/comments/getcomment",
                         method: "POST",
                         data: { key: key },
                         headers: { "Content-Type": "application/json" }
@@ -47,86 +69,33 @@
                 }
             };
             // POST COMMENT ============================================================================================
-            this.createCommentFromScope = function () {
-                if (this._keySelectedComment && this.textAreaComment) {
-                    // Dimension key
-                    var dimKey = this._keySelectedComment;
-                    // author
-                    var author = this._user;
-                    // Comment
-                    var textAreaComment = this.textAreaComment;
-                    var dimensions = this._dimensionsInfo
-                        .map(function (dim) { return dim.qFallbackTitle; })
-                        .join(this.commentSeparator);
-                    return new Comment(dimKey, author, textAreaComment, dimensions);
-                }
-                else {
-                    console.log("information is missing");
-                }
-            };
             this.postComment = function () {
-                var _this = this;
-                var comment = this.createCommentFromScope();
-                if (comment) {
-                    console.log(comment);
-                    this.http({
-                        url: "http://localhost:3000/comments/add",
-                        method: "POST",
-                        data: { comment: comment },
-                        headers: { "Content-Type": "application/json" }
-                    }).then(function (res) {
-                        console.log("Comment succesfully added");
-                        _this._model.emit("changed");
-                    });
-                }
-            };
-            // UI HELPERS =======================================================
-            this.state = { selected: undefined };
-            this.commentSelToggle = function (index) {
-                this.state.selected = this.state.selected != index ? index : undefined;
+                console.log('posting comment');
+                this.http({
+                    url: "http://localhost:5000",
+                    method: "POST",
+                    data: { comment: 'hello' },
+                    headers: { "Content-Type": "application/json" }
+                }).then(function (res) {
+                    console.log("Comment succesfully added");
+                });
             };
             // ============================ Retrieving comments =================
-            this.retrieveComments = function () {
-                var _this = this;
+            this.getAllComments = function () {
                 this.http({
-                    url: "http://localhost:3000/comments/retrieveAll",
+                    url: "http://localhost:4000/comments/getAll",
                     method: "GET"
                 }).then(function (comments) {
-                    _this._model.app.getObject(_this.extId).then(function (extObj) {
-                        extObj.getProperties().then(function (extProps) {
-                            extProps.hComments = comments.data;
-                            console.log(extProps);
-                            extObj.setProperties(extProps).then(function () {
-                                extObj.getLayout();
-                            });
-                        });
-                    });
+                    console.log(comments);
                 });
             };
             // =======================================================================
             this.clearDb = function () {
-                console.log("test");
                 this.http({
-                    url: "http://localhost:3000/comments/clearDb",
+                    url: "http://localhost:4000/comments/clearDb",
                     method: "GET"
                 }).then(function (res) {
                     console.log(res);
-                });
-            };
-            // dev functions ============================================================
-            this.getExtProps = function () {
-                this._model.app.getObject(this.extId).then(function (extObj) {
-                    console.log(extObj);
-                });
-            };
-            this.reload = function () {
-                var _this = this;
-                this._model.app.doReload(0, true, false).then(function (res) {
-                    _this._model.app.getAppLayout().then(function (layout) {
-                        _this._model.app.resume().then(function () {
-                            console.log('resuming app');
-                        });
-                    });
                 });
             };
             var that = this;
@@ -167,11 +136,9 @@
                     // ========== Creating dynamic hypercube ==========//
                     that._model
                         .getProperties()
-                        .then(function (extProps) {
-                        hyperCubeDef = extProps.qHyperCubeDef;
-                        that.extCubeWidth =
-                            extProps.qHyperCubeDef.qDimensions.length +
-                                extProps.qHyperCubeDef.qMeasures.length;
+                        .then(function (sessionObjProps) {
+                        hyperCubeDef = sessionObjProps.qHyperCubeDef;
+                        that.extCubeWidth = sessionObjProps.qHyperCubeDef.qDimensions.length + sessionObjProps.qHyperCubeDef.qMeasures.length;
                         var nxPage = {
                             qLeft: 0,
                             qTop: 0,
@@ -212,53 +179,39 @@
             configurable: true
         });
         CommentTblCntrl.prototype.setData = function (hyperCube) {
-            var _this = this;
             // set Hypercube Matrix Data
             var that = this;
-            console.log(hyperCube.qDataPages);
-            var addCommentsToCube = function () {
-                return new Promise(function (resolve, reject) {
-                    that.http({
-                        url: "http://localhost:3000/comments/addCommentsToCube",
-                        method: "POST",
-                        data: { matrix: hyperCube.qDataPages[0].qMatrix, commentSeparator: that.commentSeparator },
-                        headers: { "Content-Type": "application/json" }
-                    }).then(function (matrixData) {
-                        resolve(matrixData.data);
-                    });
+            if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
+                // determine cube width
+                this.cubeWidth = hyperCube.qDimensionInfo.length + hyperCube.qMeasureInfo.length;
+                hyperCube.qDataPages[0].qMatrix.forEach(function (row) { return row.push({ qText: "" }); });
+                // add comment field
+                hyperCube.hyComments.forEach(function (comment) {
+                    hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex].splice(-1, 1);
+                    hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex].push({ qText: comment.comment });
                 });
-            };
-            var addCubeToScope = function (newMatrix) {
-                return new Promise(function (resolve, reject) {
-                    console.log(newMatrix);
-                    if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
-                        //this._matrixData = hyperCube.qDataPages[0].qMatrix;
-                        _this._matrixData = newMatrix;
-                        // create comment key ==========================
-                    }
-                    else {
-                        _this._matrixData = [];
-                    }
-                    // set Dimension Information
-                    if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
-                        _this._dimensionsInfo = hyperCube.qDimensionInfo;
-                    }
-                    else {
-                        _this._dimensionsInfo = [];
-                    }
-                    // set Measure Information
-                    if (hyperCube.qMeasureInfo && hyperCube.qMeasureInfo.length > 0) {
-                        _this._measureInfo = hyperCube.qMeasureInfo;
-                        _this.maxY = hyperCube.qMeasureInfo[0].qMax;
-                    }
-                    else {
-                        _this.maxY = 0;
-                    }
-                    resolve();
-                });
-            };
-            addCommentsToCube().then(addCubeToScope);
+                this._matrixData = hyperCube.qDataPages[0].qMatrix;
+            }
+            else {
+                this._matrixData = [];
+            }
+            // set Dimension Information
+            if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
+                this._dimensionsInfo = hyperCube.qDimensionInfo;
+            }
+            else {
+                this._dimensionsInfo = [];
+            }
+            // set Measure Information
+            if (hyperCube.qMeasureInfo && hyperCube.qMeasureInfo.length > 0) {
+                this._measureInfo = hyperCube.qMeasureInfo;
+                this.maxY = hyperCube.qMeasureInfo[0].qMax;
+            }
+            else {
+                this.maxY = 0;
+            }
         };
+        // =================== Destory session object ============================================= //
         CommentTblCntrl.prototype.destroySessionObject = function () {
             var that = this;
             if (that._genericObjectId !== undefined) {
@@ -270,49 +223,39 @@
                 });
             }
         };
-        // ================== add comments to hypercube ========================================== //
         // =================== Create session object ============================================= //
         CommentTblCntrl.prototype.createSessionObject = function () {
             var _this = this;
             var that = this;
             var hyperCubeProp = {
-                qInfo: {
-                    qId: "",
-                    qType: "HyperCube"
-                },
+                qInfo: { qId: "", qType: "HyperCube" },
                 qHyperCubeDef: this._hyperCubeDef
             };
             this._model.app
                 .createObject(hyperCubeProp)
                 .then(function (genericObject) {
                 _this._genericObjectId = genericObject.id;
-                genericObject
-                    .getLayout()
-                    .then(function (genHyperCubeLayout) {
-                    that.setData(genHyperCubeLayout.qHyperCube);
+                var rowKeys;
+                genericObject.getLayout().then(function (genHyperCubeLayout) {
+                    console.log(genHyperCubeLayout);
+                    rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map(function (row, rowIndex) {
+                        return { tableRowKey: row.map(function (rowItem) { return rowItem.qText; }).join('|'), tableRowIndex: rowIndex };
+                    });
+                }).then(function () {
+                    genericObject.getProperties().then(function (genObjProps) {
+                        genObjProps.qHyperCubeDef.hyRowKeys = rowKeys;
+                        genericObject.setProperties(genObjProps).then(function () {
+                            genericObject.getLayout().then(function (customHyperCubeLayout) {
+                                that.getDbComments(customHyperCubeLayout);
+                            });
+                        });
+                    });
                 });
             });
         };
-        CommentTblCntrl.prototype.createDimKey = function (tableRow) {
-            console.log(tableRow);
-            // do not include the last array item when creating the comment key
-            if (tableRow[tableRow.length - 1].qText === "") {
-                tableRow.splice(-1, 1);
-                var selectedDimensions = tableRow.map(function (cellValue) { return cellValue.qText; });
-                var key = selectedDimensions.join(this.commentSeparator);
-                this._keySelectedComment = key;
-            }
-            else {
-                var selectedDimensions = tableRow.map(function (cellValue) { return cellValue.qText; });
-                var key = selectedDimensions.join(this.commentSeparator);
-                this._keySelectedComment = key;
-            }
-        };
-        CommentTblCntrl.prototype.editComment = function (tableRow) {
-            if (!this._editMode) {
-                this.createDimKey(tableRow);
-                console.log(this);
-            }
+        CommentTblCntrl.prototype.getRowIndex = function (row, index) {
+            this._tblRowSelected = index;
+            console.log(index);
         };
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http"];
@@ -339,4 +282,4 @@
     }
     exports.ExampleDirectiveFactory = ExampleDirectiveFactory;
 });
-//# sourceMappingURL=hyCommentTbl.js.map
+//# sourceMappingURL=pgTest.js.map

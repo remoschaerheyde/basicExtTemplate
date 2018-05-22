@@ -1,5 +1,5 @@
 {
-    "name": "_writeBackTable",
+    "name": "_pgTest",
     "description": "",
     "type": "visualization",
     "icon": "filterpane",
