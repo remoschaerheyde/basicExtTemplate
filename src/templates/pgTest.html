@@ -6,7 +6,6 @@
                 <th ng-repeat="dimInfo in vm._dimensionsInfo track by $index">
                     <span ng-model="dimInfo.qFallbackTitle">{{dimInfo.qFallbackTitle}} </span>
                 </th>
-
                 <span><th>Comments</th></span>
             </tr>
         </thead>
@@ -14,18 +13,17 @@
             <tr ng-repeat="row in vm._matrixData track by $index">
                 
                 <td ng-repeat="cell in row track by $index"><span>{{cell.qText}}</span></td>
-                <td><button ng-click="vm.getRowIndex(row, $index)">Create Key</button></td>
+
+                <td>
+                    <button ng-click="vm.addComment(row, $index)">create/update comment</button>
+                </td>
             </tr>
             
         </tbody>
      </table>
      
 
-    <textarea ng-model="vm.textAreaComment" style="height: 100px; width: 300px; resize: none;" class="lui-textarea"></textarea>
-    <button ng-click ="vm.postComment()" class="lui-button">Post Comment</button>
-     
-       
-        <button ng-click="vm.getAllComments()" class="lui-button">get all comments</button>
-        <button ng-click="vm.clearDb()" class="lui-button">ClearDb</button>
+    <textarea ng-model="vm.textAreaComment"></textarea>
+    
     
 </div>

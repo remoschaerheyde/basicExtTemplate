@@ -1,15 +1,6 @@
-.selectedCommentItem {
-  color: blue;
-  background: green;
-  height: 50px;
-  width: 200px;
-  resize: none; }
-
-.NotSelectedCommentItem {
-  color: red;
-  background: yellow;
-  height: 17px;
-  width: 200px;
+textarea {
+  height: 100px;
+  width: 300px;
   resize: none; }
 
 /*# sourceMappingURL=hyCommentTbl.css.map */

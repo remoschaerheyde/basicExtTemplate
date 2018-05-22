@@ -23,12 +23,14 @@ class Comment {
 }
 
 class CommentTblCntrl implements ng.IController {
-  private _model: EngineAPI.IGenericObject;
-  private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
-  private globalObj: any;
-  private extId: string;
-  private extCubeWidth: number;
-  private cubeWidth:number;
+    private _model: EngineAPI.IGenericObject;
+    private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
+    private globalObj: any;
+    private extId: string;
+    private extCubeWidth: number;
+    private cubeWidth:number;
+    private cubeWidthWithComments:number;
+
 
   private _editMode: boolean;
   get editMode() {
@@ -108,73 +110,78 @@ class CommentTblCntrl implements ng.IController {
   private getDbComments = function(customHyperCubeLayout) {
     console.log('get comments from db');
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
-
+    
     this.http({
-      url: "http://localhost:5000",
+      url: "http://localhost:5000/api/comments/get_all",
       method: "POST",
       data: { comments: JSON.stringify(comments) },
       headers: { "Content-Type": "application/json" }
     }).then(res => {
-   
+      console.log(res);
         this._model.app.getObject(this._genericObjectId).then((sessionObj:EngineAPI.IGenericObjectProperties) => {
 
           sessionObj.getProperties().then(sessionObjProps => {
             sessionObjProps.qHyperCubeDef.hyComments = res.data
             sessionObj.setProperties(sessionObjProps).then(() => {
               sessionObj.getLayout().then(newCubeLayoutWithComments => {
-                
+                console.log('newcubelayout api call');
+                console.log(newCubeLayoutWithComments.qHyperCube);
                 this.setData(newCubeLayoutWithComments.qHyperCube);
-                
               })
             })
           })  
         })
 
-      
-      
-    }).catch(err => console.log('could not get comment data from api'))
+    }).catch(err => {
+      console.log('no comments from api received');
+      this.setData(customHyperCubeLayout.qHyperCube)
+    })
   }
 
   private setData(hyperCube: EngineAPI.IHyperCube) {
-    // set Hypercube Matrix Data
-   
+
+    console.log('--------hypercube from set data');
+    console.log(hyperCube);
+    
     let that:any = this;
-            if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
+    if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
 
-              // determine cube width
-              this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length
+    this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length
             
+    hyperCube.qDataPages[0].qMatrix.forEach((row:any) => row.push({qText: ""}));
 
-              hyperCube.qDataPages[0].qMatrix.forEach((row:any) => row.push({qText: ""}));
-                // add comment field
-
-              (hyperCube as any).hyComments.forEach(comment => {
-                  (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).splice(-1,1);
-                  (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).push({qText: comment.comment})
-              });
-
-              this._matrixData = hyperCube.qDataPages[0].qMatrix;
+    this.cubeWidthWithComments = this.cubeWidth + 1;
+    
+    // add comments if there are
+    if((hyperCube as any).hyComments) { 
+      (hyperCube as any).hyComments.forEach(comment => {
+        (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).splice(-1,1);
+        (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).push({qText: comment.comment})
+      });
+    }
+  
+    this._matrixData = hyperCube.qDataPages[0].qMatrix;
               
-              } else {
-                this._matrixData = [];
-              }
+    } else {
+    this._matrixData = [];
+    }
 
+    // set Dimension Information
+    if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
+    this._dimensionsInfo = hyperCube.qDimensionInfo;
+    } else {
+    this._dimensionsInfo = [];
+    }
           
+    // set Measure Information
+    if (hyperCube.qMeasureInfo && (hyperCube.qMeasureInfo as any).length > 0) {
+    this._measureInfo = hyperCube.qMeasureInfo;
+    this.maxY = hyperCube.qMeasureInfo[0].qMax;
+    } else {
+    this.maxY = 0;
+    }
+   
 
-              // set Dimension Information
-              if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
-                this._dimensionsInfo = hyperCube.qDimensionInfo;
-              } else {
-                this._dimensionsInfo = [];
-              }
-          
-              // set Measure Information
-              if (hyperCube.qMeasureInfo && (hyperCube.qMeasureInfo as any).length > 0) {
-                this._measureInfo = hyperCube.qMeasureInfo;
-                this.maxY = hyperCube.qMeasureInfo[0].qMax;
-              } else {
-                this.maxY = 0;
-              }
   }
   // =================== Destory session object ============================================= //
   
@@ -216,7 +223,6 @@ class CommentTblCntrl implements ng.IController {
               genObjProps.qHyperCubeDef.hyRowKeys = rowKeys;
               genericObject.setProperties(genObjProps).then(() => {
                 genericObject.getLayout().then((customHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
-              
                     that.getDbComments(customHyperCubeLayout)
                     
                  })
@@ -229,74 +235,40 @@ class CommentTblCntrl implements ng.IController {
   // CREATE DIMENSION KEY ===================================================================================
 
 
-  private _tblRowSelected;
-  private getRowIndex(row, index) {
-    this._tblRowSelected = index;
 
-    console.log(index);
-    
+
+  private addComment = function(row, index) {
+
+    // create Dim key
+    let userInput = this.textAreaComment;
+
+    let dimKeyArr = row.map(cell => cell.qText)
+    dimKeyArr.pop();
+    let dimKey = dimKeyArr.join('|')
+
+    let newComment = {dimkey: dimKey, text: userInput}
+     
+    console.log('api call');
+    this.http({
+      url: "http://localhost:5000/api/comments/add_new_comment",
+      method: "POST",
+      data: { newComment: JSON.stringify(newComment) },
+      headers: { "Content-Type": "application/json" }
+    }).then(res => {
+        console.log(res.data.message);
+        this._model.emit("changed");
+      })
+
+
+
+    this.textAreaComment = "";
   }
 
-
-
-  // GET COMMENTS ============================================================================================
-
-  private getSelectedComments = function() {
-    if (this._keySelectedComment) {
-      let key: string = this._keySelectedComment;
-
-      this.http({
-        url: "http://localhost:4000/comments/getcomment",
-        method: "POST",
-        data: { key: key },
-        headers: { "Content-Type": "application/json" }
-      }).then(res => {
-        console.log(res);
-      });
-    }
-  };
-
-  // POST COMMENT ============================================================================================
+ 
 
 
 
-  private postComment = function() {
-      
-
-      console.log('posting comment');
-      this.http({
-        url: "http://localhost:5000",
-        method: "POST",
-        data: { comment: 'hello' },
-        headers: { "Content-Type": "application/json" }
-      }).then(res => {
-        console.log("Comment succesfully added");
-        
-      });
-  };
-
-  // ============================ Retrieving comments =================
-
-  private getAllComments = function() {
-    this.http({
-      url: "http://localhost:4000/comments/getAll",
-      method: "GET"
-    }).then(comments => {
-      console.log(comments);
-    });
-  };
-
-  // =======================================================================
-
-  private clearDb = function() {
-    this.http({
-      url: "http://localhost:4000/comments/clearDb",
-      method: "GET"
-    }).then(res => {
-      console.log(res);
-    });
-  };
-
+  
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];

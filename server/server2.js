@@ -6,7 +6,6 @@ const app = express();
 const PORT = 5000;
 
 
-
 // body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -14,16 +13,17 @@ app.use(bodyParser.json())
 // cors middleware
 app.use(cors())
 
-app.post('/', (req,res) => {
+let pool = new pg.Pool({
+    port: 5432,
+    user: 'remo',
+    password: 'test',
+    database: 'remosDb',
+   // max: 10,
+    host: 'localhost'
+})
 
-    let pool = new pg.Pool({
-        port: 5432,
-        user: 'remo',
-        password: 'test',
-        database: 'remosDb',
-       // max: 10,
-        host: 'localhost'
-    })
+
+app.post('/api/comments/get_all', (req,res) => {
 
     let commentsInQlikTable = JSON.parse(req.body.comments)
 
@@ -66,16 +66,12 @@ app.post('/', (req,res) => {
                     return comparison;
                   }
                   let sortedQlikComments = commentsFound.sort(compare);
-                  console.log(sortedQlikComments)
                   let searchIndices = sortedQlikComments.map(commment => commment.indexInDb).join(',')
 
-                
                 db.query(`SELECT id,comment FROM testcomment WHERE id IN(${searchIndices})`, (queryErr,table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr);
                     } else {
-                        console.log('--------------')
-
                         let dbComments = table.rows
                          dbComments.forEach((comment, index) => {
                                  comment.tableRowIndex = sortedQlikComments[index].tableRowIndex
@@ -93,10 +89,56 @@ app.post('/', (req,res) => {
 } catch(err) {
     console.log(err)
 }
-    
-
 })
 
+app.post('/api/comments/add_new_comment', (req,res) => {
+    let newComment = JSON.parse(req.body.newComment)
+
+    try {
+    pool.connect((connErr,db,done) => {
+        if(connErr) {
+            return console.log(connErr)
+        } else {
+            console.log('connected to pool')
+         
+                db.query("SELECT * from testcomment WHERE dimkey = $1", [newComment.dimkey] ,(queryErr, table) => {
+                    if(queryErr) {
+                        res.status(400).send(queryErr)
+
+                    } else {
+
+                        // CREATE A NEW COMMENT IF NO COMMEMNT WITH DIMKEY EXISTS IN DB
+                        if(table.rows.length === 0) {
+                            // comment does not alreay exist in db
+                            console.log(`no comment with key ${newComment.dimkey} found `)
+                            db.query('INSERT INTO testcomment(dimkey, comment) VALUES($1,$2)', [newComment.dimkey, newComment.text], (queryErr,table) => {
+                                if(queryErr) {
+                                    res.status(400).send(queryErr)
+                                } else {
+                                    res.status(200).send({message: 'comment successfully added to db'})
+                                    db.end();
+                                }
+                            })
+                        } else {
+                        // UPDATE EXISTING COMMENT IF COMMENT ALREADY EXISTS IN DB
+                        let commentId = table.rows[0].id
+                        db.query('UPDATE testcomment SET comment = $1  WHERE id = $2', [newComment.text, commentId], (queryErr,table) => {
+                            if(queryErr) {
+                                res.status(400).send(queryErr)
+                            } else {
+                                res.status(200).send({message: 'comment successfully updated'})
+                                db.end();
+                            }
+                        })
+                    }
+                };
+            });
+        }
+    });
+} catch(err) {
+    console.log(err)
+}
+})
 
 
 
