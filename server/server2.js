@@ -23,8 +23,6 @@ let pool = new pg.Pool({
 })
 
 
-
-
 app.post('/api/comments/get_all', (req,res) => {
 
     let commentsInQlikTable = JSON.parse(req.body.comments)
@@ -93,9 +91,7 @@ app.post('/api/comments/get_all', (req,res) => {
 }
 })
 
-
 app.post('/api/comments/add_new_comment', (req,res) => {
-
     let newComment = JSON.parse(req.body.newComment)
 
     try {
@@ -134,10 +130,9 @@ app.post('/api/comments/add_new_comment', (req,res) => {
                                 db.end();
                             }
                         })
-                        }
-                        
-                    };
-                });
+                    }
+                };
+            });
         }
     });
 } catch(err) {
