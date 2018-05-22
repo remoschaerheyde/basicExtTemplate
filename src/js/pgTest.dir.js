@@ -61,7 +61,7 @@
                 });
             };
             // CREATE DIMENSION KEY ===================================================================================
-            this.addComment = function (row, index) {
+            this.addOrUpdateComment = function (row, index) {
                 var _this = this;
                 // create Dim key
                 var userInput = this.textAreaComment;
@@ -80,6 +80,23 @@
                     _this._model.emit("changed");
                 });
                 this.textAreaComment = "";
+            };
+            this.deleteComment = function (row, index) {
+                var _this = this;
+                var dimKeyArr = row.map(function (cell) { return cell.qText; });
+                dimKeyArr.pop();
+                var dimKey = dimKeyArr.join('|');
+                var commentToDelete = { dimKey: dimKey };
+                console.log('api call');
+                this.http({
+                    url: "http://localhost:5000/api/comments/delete_comment",
+                    method: "POST",
+                    data: { comment: JSON.stringify(commentToDelete) },
+                    headers: { "Content-Type": "application/json" }
+                }).then(function (res) {
+                    console.log(res.data.message);
+                    _this._model.emit("changed");
+                });
             };
             var that = this;
             this.globalObj = that._model.session.app.global;

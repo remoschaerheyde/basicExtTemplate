@@ -9,21 +9,20 @@
                 <span><th>Comments</th></span>
             </tr>
         </thead>
-        <tbody style="height: 500px; overflow:scroll;">
+        <tbody>
             <tr ng-repeat="row in vm._matrixData track by $index">
                 
                 <td ng-repeat="cell in row track by $index"><span>{{cell.qText}}</span></td>
 
                 <td>
-                    <button ng-click="vm.addComment(row, $index)">create/update comment</button>
+                    <button ng-click="vm.addOrUpdateComment(row, $index)">create/update comment</button>
+                    <button ng-click="vm.deleteComment(row, $index)">delete comment</button>
+                    
                 </td>
             </tr>
             
         </tbody>
      </table>
-     
-
     <textarea ng-model="vm.textAreaComment"></textarea>
-    
     
 </div>

@@ -13,17 +13,24 @@ app.use(bodyParser.json())
 // cors middleware
 app.use(cors())
 
-let pool = new pg.Pool({
-    port: 5432,
-    user: 'remo',
-    password: 'test',
-    database: 'remosDb',
-   // max: 10,
-    host: 'localhost'
-})
 
 
+
+// UPDATE MODEL
 app.post('/api/comments/get_all', (req,res) => {
+
+
+    let pool = new pg.Pool({
+        port: 5432,
+        user: 'remo',
+        password: 'test',
+        database: 'remosDb',
+       // max: 10,
+        host: 'localhost'
+    })
+    
+    
+
 
     let commentsInQlikTable = JSON.parse(req.body.comments)
 
@@ -91,7 +98,19 @@ app.post('/api/comments/get_all', (req,res) => {
 }
 })
 
+
+// ADDING / UPDATING COMMENTS
 app.post('/api/comments/add_new_comment', (req,res) => {
+
+    let pool = new pg.Pool({
+        port: 5432,
+        user: 'remo',
+        password: 'test',
+        database: 'remosDb',
+       // max: 10,
+        host: 'localhost'
+    })
+
     let newComment = JSON.parse(req.body.newComment)
 
     try {
@@ -101,7 +120,7 @@ app.post('/api/comments/add_new_comment', (req,res) => {
         } else {
             console.log('connected to pool')
          
-                db.query("SELECT * from testcomment WHERE dimkey = $1", [newComment.dimkey] ,(queryErr, table) => {
+                db.query("SELECT * FROM testcomment WHERE dimkey = $1", [newComment.dimkey] ,(queryErr, table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr)
 
@@ -139,6 +158,59 @@ app.post('/api/comments/add_new_comment', (req,res) => {
     console.log(err)
 }
 })
+
+// DELETE SELECTED COMMENT
+app.post('/api/comments/delete_comment', (req,res) => {
+
+    let pool = new pg.Pool({
+        port: 5432,
+        user: 'remo',
+        password: 'test',
+        database: 'remosDb',
+       // max: 10,
+        host: 'localhost'
+    })
+
+    let parsedComment = JSON.parse(req.body.comment)
+    let dimKey = parsedComment.dimKey
+    try {
+    pool.connect((connErr,db,done) => {
+        if(connErr) {
+            return console.log(connErr)
+        } else {
+            console.log('connected to pool')
+         
+                // check if comment really exists in db
+                db.query("SELECT * FROM testcomment WHERE dimkey = $1", [dimKey] ,(queryErr, table) => {
+                    if(queryErr) {
+                        res.status(400).send(queryErr)
+                    } else {
+                        if(table.rows.length === 0) {
+                            console.log('no comments found, cannot delete a comment that does not exist')
+                        } else {
+                            console.log('comment found, deleting comment')
+                            let dbId = table.rows[0].id
+                            console.log(dbId)
+                            db.query("DELETE FROM testcomment WHERE id = $1",[dbId],(queryErr, table) => {
+                                if(queryErr) {
+                                    res.status(400).send(queryErr)
+                                } else {
+                                    console.log('comment deleted')
+                                    res.status(200).send({message: `Comment ${dimKey} sucessfully deleted`})
+                            }
+                        })
+                    }
+                }
+            });
+        }
+    });
+    } catch(err) {
+    console.log(err)
+    }
+})
+
+
+
 
 
 

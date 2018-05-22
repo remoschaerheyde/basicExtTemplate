@@ -3,4 +3,8 @@ textarea {
   width: 300px;
   resize: none; }
 
+tbody {
+  height: 500px;
+  overflow: scroll; }
+
 /*# sourceMappingURL=hyCommentTbl.css.map */

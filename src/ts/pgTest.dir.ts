@@ -237,7 +237,7 @@ class CommentTblCntrl implements ng.IController {
 
 
 
-  private addComment = function(row, index) {
+  private addOrUpdateComment = function(row, index) {
 
     // create Dim key
     let userInput = this.textAreaComment;
@@ -259,11 +259,34 @@ class CommentTblCntrl implements ng.IController {
         this._model.emit("changed");
       })
 
-
-
     this.textAreaComment = "";
   }
 
+    private deleteComment = function(row, index) { 
+
+
+      let dimKeyArr = row.map(cell => cell.qText)
+      dimKeyArr.pop();
+      let dimKey = dimKeyArr.join('|')
+  
+      let commentToDelete = {dimKey: dimKey}
+       
+      console.log('api call');
+      this.http({
+        url: "http://localhost:5000/api/comments/delete_comment",
+        method: "POST",
+        data: { comment: JSON.stringify(commentToDelete) },
+        headers: { "Content-Type": "application/json" }
+      }).then(res => {
+          console.log(res.data.message);
+          this._model.emit("changed");
+        })
+
+
+
+
+
+    }
  
 
 
