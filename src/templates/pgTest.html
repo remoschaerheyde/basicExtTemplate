@@ -4,8 +4,11 @@
         <thead>
             <tr>
                 <th ng-repeat="dimInfo in vm._dimensionsInfo track by $index">
-                    <span ng-model="dimInfo.qFallbackTitle">{{dimInfo.qFallbackTitle}} </span>
+                    <span>{{dimInfo.qGroupFallbackTitles[0]}} </span>
                 </th>
+               <th ng-repeat="measureInfo in vm._measureInfo track by $index">
+                    <span>{{measureInfo.qFallbackTitle}} </span>
+                </th> 
                 <span><th>Comments</th></span>
             </tr>
         </thead>

@@ -31,7 +31,7 @@
             var _this = this;
             this.http = http;
             this._user = _user;
-            this.commentSeparator = "|#£?|";
+            this.dimKeySeperator = '|';
             this.getDbComments = function (customHyperCubeLayout) {
                 var _this = this;
                 console.log('get comments from db');
@@ -42,14 +42,11 @@
                     data: { comments: JSON.stringify(comments) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
-                    console.log(res);
                     _this._model.app.getObject(_this._genericObjectId).then(function (sessionObj) {
                         sessionObj.getProperties().then(function (sessionObjProps) {
                             sessionObjProps.qHyperCubeDef.hyComments = res.data;
                             sessionObj.setProperties(sessionObjProps).then(function () {
                                 sessionObj.getLayout().then(function (newCubeLayoutWithComments) {
-                                    console.log('newcubelayout api call');
-                                    console.log(newCubeLayoutWithComments.qHyperCube);
                                     _this.setData(newCubeLayoutWithComments.qHyperCube);
                                 });
                             });
@@ -67,16 +64,14 @@
                 var userInput = this.textAreaComment;
                 var dimKeyArr = row.map(function (cell) { return cell.qText; });
                 dimKeyArr.pop();
-                var dimKey = dimKeyArr.join('|');
+                var dimKey = dimKeyArr.join(this.dimKeySeperator);
                 var newComment = { dimkey: dimKey, text: userInput };
-                console.log('api call');
                 this.http({
                     url: "http://localhost:5000/api/comments/add_new_comment",
                     method: "POST",
                     data: { newComment: JSON.stringify(newComment) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
-                    console.log(res.data.message);
                     _this._model.emit("changed");
                 });
                 this.textAreaComment = "";
@@ -85,16 +80,14 @@
                 var _this = this;
                 var dimKeyArr = row.map(function (cell) { return cell.qText; });
                 dimKeyArr.pop();
-                var dimKey = dimKeyArr.join('|');
+                var dimKey = dimKeyArr.join(this.dimKeySeperator);
                 var commentToDelete = { dimKey: dimKey };
-                console.log('api call');
                 this.http({
                     url: "http://localhost:5000/api/comments/delete_comment",
                     method: "POST",
                     data: { comment: JSON.stringify(commentToDelete) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
-                    console.log(res.data.message);
                     _this._model.emit("changed");
                 });
             };
@@ -104,7 +97,6 @@
             this.globalObj = that._model.session.app.global;
             this.extId = this._model.id;
             this.globalObj.getAuthenticatedUser().then(function (user) { return (_this._user = user); });
-            // gui vars
             scope.$on("$destroy", function () {
                 that.destroySessionObject();
             });
@@ -182,22 +174,20 @@
             configurable: true
         });
         CommentTblCntrl.prototype.setData = function (hyperCube) {
-            console.log('--------hypercube from set data');
-            console.log(hyperCube);
+            var _this = this;
             var that = this;
             if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
                 this.cubeWidth = hyperCube.qDimensionInfo.length + hyperCube.qMeasureInfo.length;
-                hyperCube.qDataPages[0].qMatrix.forEach(function (row) { return row.push({ qText: "" }); });
-                // add comments if there are
                 if (hyperCube.hyComments) {
+                    this._matrixData = hyperCube.qDataPages[0].qMatrix;
                     this.cubeWidthWithComments = this.cubeWidth + 1;
                     this.commentColIndex = this.cubeWidth;
+                    this._matrixData.forEach(function (row) { return row.push({ qText: "", qState: "L" }); });
                     hyperCube.hyComments.forEach(function (comment) {
-                        hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex].splice(-1, 1);
-                        hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex].push({ qText: comment.comment });
+                        _this._matrixData[comment.tableRowIndex].splice(-1, 1);
+                        _this._matrixData[comment.tableRowIndex].push({ qText: comment.comment, qState: "L" });
                     });
                 }
-                this._matrixData = hyperCube.qDataPages[0].qMatrix;
             }
             else {
                 this._matrixData = [];
@@ -217,6 +207,7 @@
             else {
                 this.maxY = 0;
             }
+            console.log(this);
         };
         // =================== Destory session object ============================================= //
         CommentTblCntrl.prototype.destroySessionObject = function () {
@@ -244,9 +235,10 @@
                 _this._genericObjectId = genericObject.id;
                 var rowKeys;
                 genericObject.getLayout().then(function (genHyperCubeLayout) {
-                    console.log(genHyperCubeLayout);
                     rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map(function (row, rowIndex) {
-                        return { tableRowKey: row.map(function (rowItem) { return rowItem.qText; }).join('|'), tableRowIndex: rowIndex };
+                        var rowWithoutMeasures = row.filter(function (rowItem) { return rowItem.qState !== "L"; });
+                        var key = rowWithoutMeasures.map(function (rowItem) { return rowItem.qText; }).join(_this.dimKeySeperator);
+                        return { tableRowKey: key, tableRowIndex: rowIndex };
                     });
                 }).then(function () {
                     genericObject.getProperties().then(function (genObjProps) {

@@ -34,6 +34,7 @@ app.post('/api/comments/get_all', (req,res) => {
 
     let commentsInQlikTable = JSON.parse(req.body.comments)
 
+    console.log(commentsInQlikTable)
     try {
     pool.connect((connErr,db,done) => {
         if(connErr) {

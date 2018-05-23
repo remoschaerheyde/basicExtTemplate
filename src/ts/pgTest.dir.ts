@@ -31,6 +31,7 @@ class CommentTblCntrl implements ng.IController {
     private cubeWidth:number;
     private cubeWidthWithComments:number;
     private commentColIndex:number;
+    private dimKeySeperator:string = '|';
 
 
   private _editMode: boolean;
@@ -40,8 +41,6 @@ class CommentTblCntrl implements ng.IController {
   set editMode(v: boolean) {
     this._editMode = v;
   }
-
-  private commentSeparator: string = "|#£?|";
 
   // Model ==================================================================================
 
@@ -111,28 +110,22 @@ class CommentTblCntrl implements ng.IController {
   private getDbComments = function(customHyperCubeLayout) {
     console.log('get comments from db');
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
-    
     this.http({
       url: "http://localhost:5000/api/comments/get_all",
       method: "POST",
       data: { comments: JSON.stringify(comments) },
       headers: { "Content-Type": "application/json" }
     }).then(res => {
-      console.log(res);
         this._model.app.getObject(this._genericObjectId).then((sessionObj:EngineAPI.IGenericObjectProperties) => {
-
           sessionObj.getProperties().then(sessionObjProps => {
             sessionObjProps.qHyperCubeDef.hyComments = res.data
             sessionObj.setProperties(sessionObjProps).then(() => {
               sessionObj.getLayout().then(newCubeLayoutWithComments => {
-                console.log('newcubelayout api call');
-                console.log(newCubeLayoutWithComments.qHyperCube);
                 this.setData(newCubeLayoutWithComments.qHyperCube);
               })
             })
           })  
         })
-
     }).catch(err => {
       console.log('no comments from api received');
       this.setData(customHyperCubeLayout.qHyperCube)
@@ -141,32 +134,29 @@ class CommentTblCntrl implements ng.IController {
 
   private setData(hyperCube: EngineAPI.IHyperCube) {
 
-    console.log('--------hypercube from set data');
-    console.log(hyperCube);
-    
     let that:any = this;
     if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
 
     this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length
             
-    hyperCube.qDataPages[0].qMatrix.forEach((row:any) => row.push({qText: ""}));
+    if((hyperCube as any).hyComments) {
 
+        this._matrixData = hyperCube.qDataPages[0].qMatrix;
 
-    
-    // add comments if there are
-    if((hyperCube as any).hyComments) { 
+        this.cubeWidthWithComments = this.cubeWidth + 1;
+        this.commentColIndex = this.cubeWidth;
 
-      this.cubeWidthWithComments = this.cubeWidth + 1;
-      this.commentColIndex = this.cubeWidth;
-
+        this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
+        
       (hyperCube as any).hyComments.forEach(comment => {
-        (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).splice(-1,1);
-        (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).push({qText: comment.comment})
+        (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
+        (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
+
       });
-    }
-  
-    this._matrixData = hyperCube.qDataPages[0].qMatrix;
-              
+
+      }
+
+
     } else {
     this._matrixData = [];
     }
@@ -185,7 +175,8 @@ class CommentTblCntrl implements ng.IController {
     } else {
     this.maxY = 0;
     }
-   
+
+    console.log(this);
 
   }
   // =================== Destory session object ============================================= //
@@ -218,18 +209,22 @@ class CommentTblCntrl implements ng.IController {
         this._genericObjectId = genericObject.id;
       
         let rowKeys;
-          genericObject.getLayout().then((genHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
-              console.log(genHyperCubeLayout);
-              rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex) => {
-              return {tableRowKey: row.map(rowItem => rowItem.qText).join('|'), tableRowIndex: rowIndex };
-            })
+         
+        genericObject.getLayout().then((genHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
+
+          rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex) => {
+              let rowWithoutMeasures = row.filter(rowItem => rowItem.qState !== "L") 
+              let key = rowWithoutMeasures.map(rowItem => rowItem.qText).join(this.dimKeySeperator)
+              
+              return {tableRowKey: key, tableRowIndex: rowIndex };
+          });
+            
           }).then(() => {
             genericObject.getProperties().then((genObjProps:EngineAPI.IGenericObjectProperties) => {
               genObjProps.qHyperCubeDef.hyRowKeys = rowKeys;
               genericObject.setProperties(genObjProps).then(() => {
                 genericObject.getLayout().then((customHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
                     that.getDbComments(customHyperCubeLayout)
-                    
                  })
               })
             })
@@ -249,18 +244,16 @@ class CommentTblCntrl implements ng.IController {
 
     let dimKeyArr = row.map(cell => cell.qText)
     dimKeyArr.pop();
-    let dimKey = dimKeyArr.join('|')
+    let dimKey = dimKeyArr.join(this.dimKeySeperator)
 
     let newComment = {dimkey: dimKey, text: userInput}
-     
-    console.log('api call');
+    
     this.http({
       url: "http://localhost:5000/api/comments/add_new_comment",
       method: "POST",
       data: { newComment: JSON.stringify(newComment) },
       headers: { "Content-Type": "application/json" }
     }).then(res => {
-        console.log(res.data.message);
         this._model.emit("changed");
       })
 
@@ -269,21 +262,18 @@ class CommentTblCntrl implements ng.IController {
 
     private deleteComment = function(row, index) { 
 
-
       let dimKeyArr = row.map(cell => cell.qText)
       dimKeyArr.pop();
-      let dimKey = dimKeyArr.join('|')
+      let dimKey = dimKeyArr.join(this.dimKeySeperator)
   
       let commentToDelete = {dimKey: dimKey}
-       
-      console.log('api call');
+
       this.http({
         url: "http://localhost:5000/api/comments/delete_comment",
         method: "POST",
         data: { comment: JSON.stringify(commentToDelete) },
         headers: { "Content-Type": "application/json" }
       }).then(res => {
-          console.log(res.data.message);
           this._model.emit("changed");
         })
     }
@@ -292,9 +282,6 @@ class CommentTblCntrl implements ng.IController {
 
    
     private showEditForCell: number = -1;
-
-
-  
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];
@@ -307,13 +294,6 @@ class CommentTblCntrl implements ng.IController {
     this.extId = this._model.id;
 
     this.globalObj.getAuthenticatedUser().then(user => (this._user = user));
-
-
-    // gui vars
-    
-
-
-
 
     scope.$on("$destroy", function() {
       that.destroySessionObject();
