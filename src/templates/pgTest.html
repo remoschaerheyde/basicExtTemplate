@@ -2,7 +2,7 @@
      <h1>heyde comment tbl</h1>
      <table>
         <thead>
-            <tr >
+            <tr>
                 <th ng-repeat="dimInfo in vm._dimensionsInfo track by $index">
                     <span ng-model="dimInfo.qFallbackTitle">{{dimInfo.qFallbackTitle}} </span>
                 </th>
@@ -10,19 +10,28 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="row in vm._matrixData track by $index">
-                
-                <td ng-repeat="cell in row track by $index"><span>{{cell.qText}}</span></td>
+            <tr ng-repeat="row in vm._matrixData track by $index" ng-init="outerRowIndex = $index">
+                <td ng-repeat="cell in row track by $index">
+                    <div ng-if="$index !== vm.commentColIndex" >
+                        <span>{{cell.qText}}</span>
+                    </div>
+                    <div ng-if="$index === vm.commentColIndex">
+                        <input type="text" value="{{cell.qText}}" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="vm.showEditForCell = outerRowIndex; vm.textAreaComment = cell.qText"> 
+                        
+                      <div ng-show="vm.showEditForCell === outerRowIndex">
+                            <h2>Edit Comment</h2>
+                            <textarea ng-model="vm.textAreaComment"></textarea>
+                            <br>
+                            <button ng-click="vm.addOrUpdateComment(row, outerRowIndex); vm.showEditForCell = -1">create/update</button>
+                            <button ng-click="vm.deleteComment(row, outerRowIndex); vm.showEditForCell = -1">delete</button>
 
-                <td>
-                    <button ng-click="vm.addOrUpdateComment(row, $index)">create/update comment</button>
-                    <button ng-click="vm.deleteComment(row, $index)">delete comment</button>
-                    
+                            <button ng-click="vm.showEditForCell = -1">close</button>
+                        </div>
+                    </div>
                 </td>
+        
             </tr>
-            
         </tbody>
      </table>
-    <textarea ng-model="vm.textAreaComment"></textarea>
-    
+
 </div>

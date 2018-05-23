@@ -98,10 +98,13 @@
                     _this._model.emit("changed");
                 });
             };
+            // GUI =========================================================================>>>
+            this.showEditForCell = -1;
             var that = this;
             this.globalObj = that._model.session.app.global;
             this.extId = this._model.id;
             this.globalObj.getAuthenticatedUser().then(function (user) { return (_this._user = user); });
+            // gui vars
             scope.$on("$destroy", function () {
                 that.destroySessionObject();
             });
@@ -185,9 +188,10 @@
             if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
                 this.cubeWidth = hyperCube.qDimensionInfo.length + hyperCube.qMeasureInfo.length;
                 hyperCube.qDataPages[0].qMatrix.forEach(function (row) { return row.push({ qText: "" }); });
-                this.cubeWidthWithComments = this.cubeWidth + 1;
                 // add comments if there are
                 if (hyperCube.hyComments) {
+                    this.cubeWidthWithComments = this.cubeWidth + 1;
+                    this.commentColIndex = this.cubeWidth;
                     hyperCube.hyComments.forEach(function (comment) {
                         hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex].splice(-1, 1);
                         hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex].push({ qText: comment.comment });

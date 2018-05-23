@@ -30,6 +30,7 @@ class CommentTblCntrl implements ng.IController {
     private extCubeWidth: number;
     private cubeWidth:number;
     private cubeWidthWithComments:number;
+    private commentColIndex:number;
 
 
   private _editMode: boolean;
@@ -150,10 +151,14 @@ class CommentTblCntrl implements ng.IController {
             
     hyperCube.qDataPages[0].qMatrix.forEach((row:any) => row.push({qText: ""}));
 
-    this.cubeWidthWithComments = this.cubeWidth + 1;
+
     
     // add comments if there are
     if((hyperCube as any).hyComments) { 
+
+      this.cubeWidthWithComments = this.cubeWidth + 1;
+      this.commentColIndex = this.cubeWidth;
+
       (hyperCube as any).hyComments.forEach(comment => {
         (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).splice(-1,1);
         (hyperCube.qDataPages[0].qMatrix[comment.tableRowIndex] as any).push({qText: comment.comment})
@@ -281,14 +286,12 @@ class CommentTblCntrl implements ng.IController {
           console.log(res.data.message);
           this._model.emit("changed");
         })
-
-
-
-
-
     }
- 
 
+    // GUI =========================================================================>>>
+
+   
+    private showEditForCell: number = -1;
 
 
   
@@ -304,6 +307,13 @@ class CommentTblCntrl implements ng.IController {
     this.extId = this._model.id;
 
     this.globalObj.getAuthenticatedUser().then(user => (this._user = user));
+
+
+    // gui vars
+    
+
+
+
 
     scope.$on("$destroy", function() {
       that.destroySessionObject();
