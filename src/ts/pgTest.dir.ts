@@ -7,34 +7,41 @@ interface IQVAngular {
 }
 
 class Comment {
-  public _dateTime: string = this.dateTime();
+  public dateTime: string = this.getDateTime();
+  public usedDimensions: string = this.createDimString();
 
-  private dateTime(): string {
+  private getDateTime(): string {
     let currentdate: Date = new Date();
     return `${currentdate.getDate()}/${currentdate.getMonth() +
       1}/${currentdate.getFullYear()}|${currentdate.getHours()}:${currentdate.getMinutes()}:${currentdate.getSeconds()}`;
   }
+
+  private createDimString(): string {
+    let dimString = this.dimensions.map((dim:EngineAPI.INxDimensionInfo) => dim.qGroupFallbackTitles[0]).join('|');
+    delete this.dimensions
+    return dimString;
+  }
+
   constructor(
     private dimKey: string,
     private author: string,
     private comment: string,
-    private dimensions: string
+    private dimensions: any,
+    private extensionId: string
   ) {}
 }
 
-
-
-
 class CommentTblCntrl implements ng.IController {
+
     private _model: EngineAPI.IGenericObject;
     private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
     private globalObj: any;
-    private extId: string;
     private extCubeWidth: number;
     private cubeWidth:number;
     private cubeWidthWithComments:number;
     private commentColIndex:number;
-    private dimKeySeperator:string = '|';
+    private user: string;
+    private stringSeperator:string = '|';
 
 
   private _editMode: boolean;
@@ -111,7 +118,6 @@ class CommentTblCntrl implements ng.IController {
   }
 
   private getDbComments = function(customHyperCubeLayout) {
-    console.log('get comments from db');
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
     this.http({
       url: "http://localhost:5000/api/comments/get_all",
@@ -140,26 +146,19 @@ class CommentTblCntrl implements ng.IController {
     let that:any = this;
     if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
 
-    this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length
-            
+    this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length  
     if((hyperCube as any).hyComments) {
 
         this._matrixData = hyperCube.qDataPages[0].qMatrix;
-
         this.cubeWidthWithComments = this.cubeWidth + 1;
         this.commentColIndex = this.cubeWidth;
 
         this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
-        
       (hyperCube as any).hyComments.forEach(comment => {
         (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
         (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
-
       });
-
-      }
-
-
+    }
     } else {
     this._matrixData = [];
     }
@@ -178,9 +177,6 @@ class CommentTblCntrl implements ng.IController {
     } else {
     this.maxY = 0;
     }
-
-    console.log(this);
-
   }
   // =================== Destory session object ============================================= //
   
@@ -212,14 +208,10 @@ class CommentTblCntrl implements ng.IController {
         this._genericObjectId = genericObject.id;
       
         let rowKeys;
-         
         genericObject.getLayout().then((genHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
 
           rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex) => {
-              let rowWithoutMeasures = row.filter(rowItem => rowItem.qState !== "L") 
-              let key = rowWithoutMeasures.map(rowItem => rowItem.qText).join(this.dimKeySeperator)
-              
-              return {tableRowKey: key, tableRowIndex: rowIndex };
+              return {tableRowKey: this.createDimKey(row), tableRowIndex: rowIndex };
           });
             
           }).then(() => {
@@ -232,71 +224,62 @@ class CommentTblCntrl implements ng.IController {
               })
             })
           })
-      });
+    });
   }
 
   // CREATE DIMENSION KEY ===================================================================================
 
+  private createDimKey(row:EngineAPI.INxCellRows):string {
+   
+    return (row as any).filter(col => col.qState !== "L").map(cell => cell.qText).join(this.stringSeperator)
+  }
 
+  private addOrUpdateComment = function(row:EngineAPI.INxCellRows) {
 
+    let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id)
 
-  private addOrUpdateComment = function(row, index) {
-
-    // create Dim key
-    let userInput = this.textAreaComment;
-
-    let dimKeyArr = row.map(cell => cell.qText)
-    dimKeyArr.pop();
-    let dimKey = dimKeyArr.join(this.dimKeySeperator)
-
-    let newComment = {dimkey: dimKey, text: userInput}
-    
     this.http({
       url: "http://localhost:5000/api/comments/add_new_comment",
       method: "POST",
       data: { newComment: JSON.stringify(newComment) },
       headers: { "Content-Type": "application/json" }
     }).then(res => {
+    
         this._model.emit("changed");
+      }).catch(err => {
+        console.log(err);
       })
 
     this.textAreaComment = "";
   }
 
-    private deleteComment = function(row, index) { 
+    private deleteComment = function(row:EngineAPI.INxCellRows) { 
 
-      let dimKeyArr = row.map(cell => cell.qText)
-      dimKeyArr.pop();
-      let dimKey = dimKeyArr.join(this.dimKeySeperator)
-  
+      let dimKey:string = this.createDimKey(row);
+
       let commentToDelete = {dimKey: dimKey}
 
       this.http({
         url: "http://localhost:5000/api/comments/delete_comment",
         method: "POST",
-        data: { comment: JSON.stringify(commentToDelete) },
+        data: {dimKey: JSON.stringify(dimKey) },
         headers: { "Content-Type": "application/json" }
       }).then(res => {
           this._model.emit("changed");
         })
     }
 
-    // GUI =========================================================================>>>
-
-   
-    private showEditForCell: number = -1;
-
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];
 
-  constructor(timeout: ng.ITimeoutService, element: JQuery, scope: ng.IScope, private http: ng.IHttpProvider, private _user: string) {
+  constructor(timeout: ng.ITimeoutService, element: JQuery, scope: ng.IScope, private http: ng.IHttpProvider) {
     const that: any = this;
-
+    
+    // GLOBAL OBJECT
     this.globalObj = that._model.session.app.global;
 
-    this.extId = this._model.id;
-
-    this.globalObj.getAuthenticatedUser().then(user => (this._user = user));
+    // GET AUTHENTICATED USER
+    this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
 
     scope.$on("$destroy", function() {
       that.destroySessionObject();

@@ -24,13 +24,12 @@
                             <h2>Edit Comment</h2>
                             <textarea ng-model="vm.textAreaComment"></textarea>
                             <br>
-                            <button ng-click="vm.addOrUpdateComment(row, outerRowIndex); vm.showEditForCell = -1">create/update</button>
-                            <button ng-click="vm.deleteComment(row, outerRowIndex); vm.showEditForCell = -1">delete</button>
+                            <button ng-click="vm.addOrUpdateComment(row); vm.showEditForCell = -1">create/update</button>
+                            <button ng-click="vm.deleteComment(row); vm.showEditForCell = -1">delete</button>
                             <button ng-click="vm.showEditForCell = -1">close</button>
                         </div>
                     </div>
                 </td>
-        
             </tr>
         </tbody>
      </table>

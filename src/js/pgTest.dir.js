@@ -12,29 +12,34 @@
     var template = require("text!../templates/pgTest.html");
     require("css!../css/hyCommentTbl.css");
     var Comment = /** @class */ (function () {
-        function Comment(dimKey, author, comment, dimensions) {
+        function Comment(dimKey, author, comment, dimensions, extensionId) {
             this.dimKey = dimKey;
             this.author = author;
             this.comment = comment;
             this.dimensions = dimensions;
-            this._dateTime = this.dateTime();
+            this.extensionId = extensionId;
+            this.dateTime = this.getDateTime();
+            this.usedDimensions = this.createDimString();
         }
-        Comment.prototype.dateTime = function () {
+        Comment.prototype.getDateTime = function () {
             var currentdate = new Date();
             return currentdate.getDate() + "/" + (currentdate.getMonth() +
                 1) + "/" + currentdate.getFullYear() + "|" + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
         };
+        Comment.prototype.createDimString = function () {
+            var dimString = this.dimensions.map(function (dim) { return dim.qGroupFallbackTitles[0]; }).join('|');
+            delete this.dimensions;
+            return dimString;
+        };
         return Comment;
     }());
     var CommentTblCntrl = /** @class */ (function () {
-        function CommentTblCntrl(timeout, element, scope, http, _user) {
+        function CommentTblCntrl(timeout, element, scope, http) {
             var _this = this;
             this.http = http;
-            this._user = _user;
-            this.dimKeySeperator = '|';
+            this.stringSeperator = '|';
             this.getDbComments = function (customHyperCubeLayout) {
                 var _this = this;
-                console.log('get comments from db');
                 var comments = customHyperCubeLayout.qHyperCube.hyRowKeys;
                 this.http({
                     url: "http://localhost:5000/api/comments/get_all",
@@ -57,15 +62,9 @@
                     _this.setData(customHyperCubeLayout.qHyperCube);
                 });
             };
-            // CREATE DIMENSION KEY ===================================================================================
-            this.addOrUpdateComment = function (row, index) {
+            this.addOrUpdateComment = function (row) {
                 var _this = this;
-                // create Dim key
-                var userInput = this.textAreaComment;
-                var dimKeyArr = row.map(function (cell) { return cell.qText; });
-                dimKeyArr.pop();
-                var dimKey = dimKeyArr.join(this.dimKeySeperator);
-                var newComment = { dimkey: dimKey, text: userInput };
+                var newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id);
                 this.http({
                     url: "http://localhost:5000/api/comments/add_new_comment",
                     method: "POST",
@@ -73,30 +72,29 @@
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
                     _this._model.emit("changed");
+                }).catch(function (err) {
+                    console.log(err);
                 });
                 this.textAreaComment = "";
             };
-            this.deleteComment = function (row, index) {
+            this.deleteComment = function (row) {
                 var _this = this;
-                var dimKeyArr = row.map(function (cell) { return cell.qText; });
-                dimKeyArr.pop();
-                var dimKey = dimKeyArr.join(this.dimKeySeperator);
+                var dimKey = this.createDimKey(row);
                 var commentToDelete = { dimKey: dimKey };
                 this.http({
                     url: "http://localhost:5000/api/comments/delete_comment",
                     method: "POST",
-                    data: { comment: JSON.stringify(commentToDelete) },
+                    data: { dimKey: JSON.stringify(dimKey) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
                     _this._model.emit("changed");
                 });
             };
-            // GUI =========================================================================>>>
-            this.showEditForCell = -1;
             var that = this;
+            // GLOBAL OBJECT
             this.globalObj = that._model.session.app.global;
-            this.extId = this._model.id;
-            this.globalObj.getAuthenticatedUser().then(function (user) { return (_this._user = user); });
+            // GET AUTHENTICATED USER
+            this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
             scope.$on("$destroy", function () {
                 that.destroySessionObject();
             });
@@ -207,7 +205,6 @@
             else {
                 this.maxY = 0;
             }
-            console.log(this);
         };
         // =================== Destory session object ============================================= //
         CommentTblCntrl.prototype.destroySessionObject = function () {
@@ -236,9 +233,7 @@
                 var rowKeys;
                 genericObject.getLayout().then(function (genHyperCubeLayout) {
                     rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map(function (row, rowIndex) {
-                        var rowWithoutMeasures = row.filter(function (rowItem) { return rowItem.qState !== "L"; });
-                        var key = rowWithoutMeasures.map(function (rowItem) { return rowItem.qText; }).join(_this.dimKeySeperator);
-                        return { tableRowKey: key, tableRowIndex: rowIndex };
+                        return { tableRowKey: _this.createDimKey(row), tableRowIndex: rowIndex };
                     });
                 }).then(function () {
                     genericObject.getProperties().then(function (genObjProps) {
@@ -251,6 +246,10 @@
                     });
                 });
             });
+        };
+        // CREATE DIMENSION KEY ===================================================================================
+        CommentTblCntrl.prototype.createDimKey = function (row) {
+            return row.filter(function (col) { return col.qState !== "L"; }).map(function (cell) { return cell.qText; }).join(this.stringSeperator);
         };
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http"];

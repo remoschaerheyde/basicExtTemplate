@@ -3,7 +3,11 @@
     "exclude": [
       ".vscode",
       "node_modules",
-      "server"
+      "server",
+      "./src/scss",
+      "./src/templates",
+      "./src/css",
+      "./src/.sass-cache"
     ],
     "compilerOptions": {
       "module": "umd",
