@@ -15,9 +15,11 @@
         <tbody>
             <tr ng-repeat="row in vm._matrixData track by $index" ng-init="outerRowIndex = $index">
                 <td ng-repeat="cell in row track by $index">
+                    <!-- display row and measures -->
                     <div ng-if="$index !== vm.commentColIndex" >
                         <span>{{cell.qText}}</span>
-                    </div>
+                    </div> 
+                    <!-- display comments -->
                     <div ng-if="$index === vm.commentColIndex">
                         <input type="text" value="{{cell.qText}}" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="vm.showEditForCell = outerRowIndex; vm.textAreaComment = cell.qText"> 
                       <div ng-show="vm.showEditForCell === outerRowIndex">

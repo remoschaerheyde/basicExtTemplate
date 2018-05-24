@@ -93,7 +93,6 @@ class CommentTblCntrl implements ng.IController {
   }
 
   // ================== Set the data of the session object ================================//
-
   private _matrixData: EngineAPI.INxCellRows[];
 
   private _dimensionsInfo: any;
@@ -143,22 +142,26 @@ class CommentTblCntrl implements ng.IController {
 
   private setData(hyperCube: EngineAPI.IHyperCube) {
 
+    console.log('------ setting data -------------');
+    console.log(hyperCube);
     let that:any = this;
     if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
 
     this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length  
-    if((hyperCube as any).hyComments) {
 
-        this._matrixData = hyperCube.qDataPages[0].qMatrix;
-        this.cubeWidthWithComments = this.cubeWidth + 1;
-        this.commentColIndex = this.cubeWidth;
+    this._matrixData = hyperCube.qDataPages[0].qMatrix;
+    this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
+    this.cubeWidthWithComments = this.cubeWidth + 1;
+    this.commentColIndex = this.cubeWidth;
 
-        this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
-      (hyperCube as any).hyComments.forEach(comment => {
-        (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
-        (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
-      });
-    }
+      if((hyperCube as any).hyComments) {
+
+        (hyperCube as any).hyComments.forEach(comment => {
+          (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
+          (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
+        });
+
+      } 
     } else {
     this._matrixData = [];
     }

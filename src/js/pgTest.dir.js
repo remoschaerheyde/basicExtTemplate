@@ -173,14 +173,16 @@
         });
         CommentTblCntrl.prototype.setData = function (hyperCube) {
             var _this = this;
+            console.log('------ setting data -------------');
+            console.log(hyperCube);
             var that = this;
             if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
                 this.cubeWidth = hyperCube.qDimensionInfo.length + hyperCube.qMeasureInfo.length;
+                this._matrixData = hyperCube.qDataPages[0].qMatrix;
+                this._matrixData.forEach(function (row) { return row.push({ qText: "", qState: "L" }); });
+                this.cubeWidthWithComments = this.cubeWidth + 1;
+                this.commentColIndex = this.cubeWidth;
                 if (hyperCube.hyComments) {
-                    this._matrixData = hyperCube.qDataPages[0].qMatrix;
-                    this.cubeWidthWithComments = this.cubeWidth + 1;
-                    this.commentColIndex = this.cubeWidth;
-                    this._matrixData.forEach(function (row) { return row.push({ qText: "", qState: "L" }); });
                     hyperCube.hyComments.forEach(function (comment) {
                         _this._matrixData[comment.tableRowIndex].splice(-1, 1);
                         _this._matrixData[comment.tableRowIndex].push({ qText: comment.comment, qState: "L" });
