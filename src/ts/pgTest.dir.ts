@@ -22,6 +22,9 @@ class Comment {
   ) {}
 }
 
+
+
+
 class CommentTblCntrl implements ng.IController {
     private _model: EngineAPI.IGenericObject;
     private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
