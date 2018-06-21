@@ -1,0 +1,58 @@
+.hy-comment-table-container {
+  height: 100%;
+  width: 100%; }
+
+.hy-comment-table {
+  height: 100%;
+  width: 100%; }
+
+.hy-comment-table thead, .hy-comment-table tbody {
+  display: block;
+  width: 100%; }
+
+.hy-comment-table thead th, .hy-comment-table tbody td {
+  text-align: left;
+  cursor: pointer;
+  padding: 2px 0px 1px 0px; }
+
+.hy-comment-table thead {
+  height: 5%;
+  background: #A791BE;
+  color: #fff; }
+
+.hy-comment-table tbody {
+  height: 95%;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid lightgray; }
+
+.hy-comment-table .hy-nonComment-col {
+  width: 100px; }
+
+.hy-comment-emtpy-div {
+  visibility: hidden; }
+
+.hy-comment-textarea {
+  height: 100px;
+  resize: none; }
+
+.hy-comment-table .hy-comment-display:hover {
+  background: #A791BE;
+  color: #fff; }
+
+.hy-comment-display {
+  background: lightblue;
+  word-wrap: normal; }
+
+.hy-comment-textPreviewArea {
+  height: 50px;
+  resize: none; }
+
+.hy-comment-text-preview {
+  resize: none;
+  height: 100px; }
+
+.testDiv {
+  background: red; }
+
+/*# sourceMappingURL=main.css.map */

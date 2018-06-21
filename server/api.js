@@ -7,21 +7,19 @@ const dbTable = 'testcomment2'
 
 // UPDATE MODEL
 router.post('/comments/get_all', (req,res) => {
-
     let pool = new pg.Pool(poolConfig)
 
     let commentsInQlikTable = JSON.parse(req.body.comments)
-
     try {
-    pool.connect((connErr,db,done) => {
+    pool.connect((connErr,db) => {
         if(connErr) {
             return console.log(connErr)
         } else {
             console.log('connected to pool')
             let commentsFound = [];
 
-            new Promise((resolve,reject) => {
-                db.query(`SELECT id,dimkey from ${dbTable}`, (queryErr, table) => {
+            new Promise((resolve, reject) => {
+                db.query(`SELECT id,dimkey from ${dbTable}`,(queryErr, table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr)
                     } else {
@@ -30,16 +28,15 @@ router.post('/comments/get_all', (req,res) => {
                         commentsInQlikTable.forEach(tableRow => {
                             dbRows.forEach(dbRow => {
                                 if(dbRow.dimkey === tableRow.tableRowKey) {
-                                    commentsFound.push({indexInDb: dbRow.id, tableRowIndex: tableRow.tableRowIndex})
-                                    
+                                    commentsFound.push({indexInDb: dbRow.id, tblRowKey: tableRow.tableRowKey, tableRowIndex: tableRow.tableRowIndex})
                                 };
                             });
                         });
                         resolve(commentsFound)
-                        };
+                    };
                 });
             }).then(commentsFound => {
-                
+            
                 function compare(a,b) {
 
                     let comparison = 0;
@@ -50,17 +47,16 @@ router.post('/comments/get_all', (req,res) => {
                     }
                     return comparison;
                   }
+                  
                   let sortedQlikComments = commentsFound.sort(compare);
                   let searchIndices = sortedQlikComments.map(commment => commment.indexInDb).join(',')
 
-                db.query(`SELECT id,comment FROM ${dbTable} WHERE id IN(${searchIndices})`, (queryErr,table) => {
+                db.query(`SELECT id,dimkey,comment,ext_table_row_index FROM ${dbTable} WHERE id IN(${searchIndices})`, (queryErr,table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr);
                     } else {
                         let dbComments = table.rows
-                         dbComments.forEach((comment, index) => {
-                                 comment.tableRowIndex = sortedQlikComments[index].tableRowIndex
-                        })
+                    
                         res.setHeader('Content-Type', 'application/json');
                         res.status(200).send(JSON.stringify(dbComments))
                          db.end();
@@ -80,7 +76,6 @@ router.post('/comments/get_all', (req,res) => {
 router.post('/comments/add_new_comment', (req,res) => {
 
     let pool = new pg.Pool(poolConfig);
-
     let newComment = JSON.parse(req.body.newComment);
 
     try {
@@ -98,7 +93,7 @@ router.post('/comments/add_new_comment', (req,res) => {
                             // comment does not alreay exist in db
                             console.log(`no comment with key ${newComment.dimKey} found `)
 
-                            db.query(`INSERT INTO ${dbTable}(dimkey, comment, last_author, last_update, extension_id, used_dimensions) VALUES($1,$2,$3,$4,$5,$6)`, [newComment.dimKey, newComment.comment, newComment.author, newComment.dateTime, newComment.extensionId, newComment.usedDimensions], (queryErr,table) => {
+                            db.query(`INSERT INTO ${dbTable}(dimkey, comment, last_author, last_update, extension_id, used_dimensions, ext_table_row_index) VALUES($1,$2,$3,$4,$5,$6, $7)`, [newComment.dimKey, newComment.comment, newComment.author, newComment.dateTime, newComment.extensionId, newComment.usedDimensions, newComment.extTblRowIndex], (queryErr,table) => {
                                 if(queryErr) {
                                     res.status(400).send(queryErr)
                                 } else {

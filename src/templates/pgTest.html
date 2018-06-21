@@ -1,34 +1,37 @@
-<div>
-     <h1>heyde comment tbl</h1>
-     <table>
+<div class="hy-comment-table-container lui-text-default">
+
+     <table class="hy-comment-table" >
         <thead>
             <tr>
-                <th ng-repeat="dimInfo in vm._dimensionsInfo track by $index">
-                    <span>{{dimInfo.qGroupFallbackTitles[0]}} </span>
-                </th>
-               <th ng-repeat="measureInfo in vm._measureInfo track by $index">
-                    <span>{{measureInfo.qFallbackTitle}} </span>
-                </th> 
-                <span><th>Comments</th></span>
+                <th class="hy-nonComment-col" ng-repeat="dimInfo in vm._dimensionsInfo track by $index"><span>{{dimInfo.qGroupFallbackTitles[0]}}</span></th>
+                <th class="hy-nonComment-col" ng-repeat="measureInfo in vm._measureInfo track by $index"><span>{{measureInfo.qFallbackTitle}} </span></th>
+                <th class="hy-comment-col"><span>Comments</span></th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="row in vm._matrixData track by $index" ng-init="outerRowIndex = $index">
-                <td ng-repeat="cell in row track by $index">
+                <td ng-repeat="cell in row track by $index" >
                     <!-- display row and measures -->
-                    <div ng-if="$index !== vm.commentColIndex" >
-                        <span>{{cell.qText}}</span>
-                    </div> 
+                    <div ng-if="$index !== vm.commentColIndex" class="hy-nonComment-col">
+        
+                            <span>{{cell.qText}}</span>
+                        
+                    </div>
                     <!-- display comments -->
-                    <div ng-if="$index === vm.commentColIndex">
-                        <input type="text" value="{{cell.qText}}" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="vm.showEditForCell = outerRowIndex; vm.textAreaComment = cell.qText"> 
-                      <div ng-show="vm.showEditForCell === outerRowIndex">
-                            <h2>Edit Comment</h2>
-                            <textarea ng-model="vm.textAreaComment"></textarea>
+                    <div ng-if="$index === vm.commentColIndex" class="hy-comment-col" ng-style="{'width': vm.commentColWidth}">
+                        <div class="hy-comment-display" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="vm.showEditForCell = outerRowIndex; vm.textAreaComment = cell.qText" ng-style="{'width': vm.commentColWidth}">
+                                <span class="hy-comment-text"> {{cell.qText}}</span>
+                        
+                               <span class="hy-comment-emtpy-div">.</span> 
+                        
+                        </div>
+                        <div class="hy-comment-edit" ng-show="vm.showEditForCell === outerRowIndex">
+                            <p>Edit</p>
+                                <textarea class="hy-comment-textarea" ng-model="vm.textAreaComment" ng-style="{'width': vm.commentColWidth}"></textarea>
                             <br>
-                            <button ng-click="vm.addOrUpdateComment(row); vm.showEditForCell = -1">create/update</button>
-                            <button ng-click="vm.deleteComment(row); vm.showEditForCell = -1">delete</button>
-                            <button ng-click="vm.showEditForCell = -1">close</button>
+                            <button class="lui-button" ng-click="vm.addOrUpdateComment(row, outerRowIndex); vm.showEditForCell = -1">Create/Update</button>
+                            <button class="lui-button" ng-click="vm.deleteComment(row); vm.showEditForCell = -1">Delete</button>
+                            <button class="lui-button" ng-click="vm.showEditForCell = -1">close</button>
                         </div>
                     </div>
                 </td>
@@ -36,4 +39,4 @@
         </tbody>
      </table>
 
-</div>
+ </div>        

@@ -1,0 +1,32 @@
+// helper class
+.hy-comment-emtpy-div {
+    visibility: hidden;
+} 
+
+
+.hy-comment-textarea {
+    height: 100px;
+    resize: none;
+}
+
+
+.hy-comment-table .hy-comment-display:hover {
+    background: $hyVioletLight;
+    color: #fff;
+}
+
+.hy-comment-display {
+    background: lightblue;
+    word-wrap: normal;
+}
+
+.hy-comment-textPreviewArea {
+    height: 50px;
+    resize: none;
+}
+
+
+.hy-comment-text-preview {
+    resize: none;
+    height: 100px;
+}

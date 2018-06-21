@@ -1,9 +1,16 @@
 import { utils } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import * as template from "text!../templates/pgTest.html";
-import "css!../css/hyCommentTbl.css";
+//import "css!../../node_modules/materialize-css/dist/css/materialize.min.css"
+//import "css!../../node_modules/bootstrap/dist/css/bootstrap.min.css"
+import "css!../css/main.css";
 
 interface IQVAngular {
   $injector: angular.auto.IInjectorService;
+}
+
+interface ElementSize {
+  height: number,
+  width: number
 }
 
 class Comment {
@@ -27,7 +34,8 @@ class Comment {
     private author: string,
     private comment: string,
     private dimensions: any,
-    private extensionId: string
+    private extensionId: string,
+    private extTblRowIndex: number
   ) {}
 }
 
@@ -118,12 +126,14 @@ class CommentTblCntrl implements ng.IController {
 
   private getDbComments = function(customHyperCubeLayout) {
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
+    console.log(comments);
     this.http({
       url: "http://localhost:5000/api/comments/get_all",
       method: "POST",
       data: { comments: JSON.stringify(comments) },
       headers: { "Content-Type": "application/json" }
     }).then(res => {
+        console.log(res);
         this._model.app.getObject(this._genericObjectId).then((sessionObj:EngineAPI.IGenericObjectProperties) => {
           sessionObj.getProperties().then(sessionObjProps => {
             sessionObjProps.qHyperCubeDef.hyComments = res.data
@@ -141,26 +151,21 @@ class CommentTblCntrl implements ng.IController {
   }
 
   private setData(hyperCube: EngineAPI.IHyperCube) {
-
-    console.log('------ setting data -------------');
     console.log(hyperCube);
-    let that:any = this;
     if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
-
-    this.cubeWidth =  hyperCube.qDimensionInfo.length + (hyperCube.qMeasureInfo as any).length  
 
     this._matrixData = hyperCube.qDataPages[0].qMatrix;
     this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
-    this.cubeWidthWithComments = this.cubeWidth + 1;
-    this.commentColIndex = this.cubeWidth;
+    this.cubeWidthWithComments = this.extCubeWidth + 1;
+    this.commentColIndex = this.extCubeWidth;
 
       if((hyperCube as any).hyComments) {
 
         (hyperCube as any).hyComments.forEach(comment => {
-          (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
-          (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
+          console.log(comment);
+          (this._matrixData[comment.ext_table_row_index] as any).splice(-1,1);
+          (this._matrixData[comment.ext_table_row_index] as any).push({qText: comment.comment , qState:"L"})
         });
-
       } 
     } else {
     this._matrixData = [];
@@ -180,6 +185,12 @@ class CommentTblCntrl implements ng.IController {
     } else {
     this.maxY = 0;
     }
+
+    // set initial gui variable --> comment row size
+    this.calcColumnWidth(this.element.width())
+
+
+
   }
   // =================== Destory session object ============================================= //
   
@@ -231,16 +242,13 @@ class CommentTblCntrl implements ng.IController {
   }
 
   // CREATE DIMENSION KEY ===================================================================================
-
   private createDimKey(row:EngineAPI.INxCellRows):string {
-   
     return (row as any).filter(col => col.qState !== "L").map(cell => cell.qText).join(this.stringSeperator)
   }
 
-  private addOrUpdateComment = function(row:EngineAPI.INxCellRows) {
-
-    let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id)
-
+  private addOrUpdateComment = function(row:EngineAPI.INxCellRows, rowIndex:number) {
+   
+    let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id, rowIndex)
     this.http({
       url: "http://localhost:5000/api/comments/add_new_comment",
       method: "POST",
@@ -272,10 +280,51 @@ class CommentTblCntrl implements ng.IController {
         })
     }
 
+    private showScope = function() {
+
+      console.log(this.element[0].offsetHeight);
+      console.log(this.element[0].offsetWidth);
+    }
+
+
+    private tableSize:any
+
+    private getSize(): ElementSize {
+      return {
+          height: this.element.height(),
+          width: this.element.width()
+      };
+    }
+
+
+    private commentColWidth:string
+    
+    private calcColumnWidth(extWidth) {
+      if(this.extCubeWidth) {
+        let regColumnWidth = 100
+        let nbrOfClumns = this.extCubeWidth
+        let padding = 20
+        
+        this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns)+ padding)) + 'px'
+        console.log(this.commentColWidth);
+
+
+      }
+
+    }
+
+
+
+    private tblHeight:string;
+    private tblHeadHeight:string;
+    private tblBodyHeight:string;
+    
+    
+
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];
 
-  constructor(timeout: ng.ITimeoutService, element: JQuery, scope: ng.IScope, private http: ng.IHttpProvider) {
+  constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider) {
     const that: any = this;
     
     // GLOBAL OBJECT
@@ -284,7 +333,28 @@ class CommentTblCntrl implements ng.IController {
     // GET AUTHENTICATED USER
     this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
 
+    
+   // console.log(this.element.width())
+
+   // this.calcColumnWidth(this.element.width())
+
+
+      // track changes of size
+      that.scope.$watch("vm.getSize()", (newValue: ElementSize) => {
+        let elemHeight = newValue.height;
+        let elemWidth = newValue.width;
+        that.calcColumnWidth(elemWidth)
+
+        
+
+        
+    }, true);
+
+
+  
+
     scope.$on("$destroy", function() {
+      console.log('destroyed');
       that.destroySessionObject();
     });
   }

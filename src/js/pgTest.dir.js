@@ -4,20 +4,23 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "text!../templates/pgTest.html", "css!../css/hyCommentTbl.css"], factory);
+        define(["require", "exports", "text!../templates/pgTest.html", "css!../css/main.css"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var template = require("text!../templates/pgTest.html");
-    require("css!../css/hyCommentTbl.css");
+    //import "css!../../node_modules/materialize-css/dist/css/materialize.min.css"
+    //import "css!../../node_modules/bootstrap/dist/css/bootstrap.min.css"
+    require("css!../css/main.css");
     var Comment = /** @class */ (function () {
-        function Comment(dimKey, author, comment, dimensions, extensionId) {
+        function Comment(dimKey, author, comment, dimensions, extensionId, extTblRowIndex) {
             this.dimKey = dimKey;
             this.author = author;
             this.comment = comment;
             this.dimensions = dimensions;
             this.extensionId = extensionId;
+            this.extTblRowIndex = extTblRowIndex;
             this.dateTime = this.getDateTime();
             this.usedDimensions = this.createDimString();
         }
@@ -36,17 +39,21 @@
     var CommentTblCntrl = /** @class */ (function () {
         function CommentTblCntrl(timeout, element, scope, http) {
             var _this = this;
+            this.element = element;
+            this.scope = scope;
             this.http = http;
             this.stringSeperator = '|';
             this.getDbComments = function (customHyperCubeLayout) {
                 var _this = this;
                 var comments = customHyperCubeLayout.qHyperCube.hyRowKeys;
+                console.log(comments);
                 this.http({
                     url: "http://localhost:5000/api/comments/get_all",
                     method: "POST",
                     data: { comments: JSON.stringify(comments) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
+                    console.log(res);
                     _this._model.app.getObject(_this._genericObjectId).then(function (sessionObj) {
                         sessionObj.getProperties().then(function (sessionObjProps) {
                             sessionObjProps.qHyperCubeDef.hyComments = res.data;
@@ -62,9 +69,9 @@
                     _this.setData(customHyperCubeLayout.qHyperCube);
                 });
             };
-            this.addOrUpdateComment = function (row) {
+            this.addOrUpdateComment = function (row, rowIndex) {
                 var _this = this;
-                var newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id);
+                var newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id, rowIndex);
                 this.http({
                     url: "http://localhost:5000/api/comments/add_new_comment",
                     method: "POST",
@@ -90,12 +97,25 @@
                     _this._model.emit("changed");
                 });
             };
+            this.showScope = function () {
+                console.log(this.element[0].offsetHeight);
+                console.log(this.element[0].offsetWidth);
+            };
             var that = this;
             // GLOBAL OBJECT
             this.globalObj = that._model.session.app.global;
             // GET AUTHENTICATED USER
             this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
+            // console.log(this.element.width())
+            // this.calcColumnWidth(this.element.width())
+            // track changes of size
+            that.scope.$watch("vm.getSize()", function (newValue) {
+                var elemHeight = newValue.height;
+                var elemWidth = newValue.width;
+                that.calcColumnWidth(elemWidth);
+            }, true);
             scope.$on("$destroy", function () {
+                console.log('destroyed');
                 that.destroySessionObject();
             });
         }
@@ -173,19 +193,17 @@
         });
         CommentTblCntrl.prototype.setData = function (hyperCube) {
             var _this = this;
-            console.log('------ setting data -------------');
             console.log(hyperCube);
-            var that = this;
             if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
-                this.cubeWidth = hyperCube.qDimensionInfo.length + hyperCube.qMeasureInfo.length;
                 this._matrixData = hyperCube.qDataPages[0].qMatrix;
                 this._matrixData.forEach(function (row) { return row.push({ qText: "", qState: "L" }); });
-                this.cubeWidthWithComments = this.cubeWidth + 1;
-                this.commentColIndex = this.cubeWidth;
+                this.cubeWidthWithComments = this.extCubeWidth + 1;
+                this.commentColIndex = this.extCubeWidth;
                 if (hyperCube.hyComments) {
                     hyperCube.hyComments.forEach(function (comment) {
-                        _this._matrixData[comment.tableRowIndex].splice(-1, 1);
-                        _this._matrixData[comment.tableRowIndex].push({ qText: comment.comment, qState: "L" });
+                        console.log(comment);
+                        _this._matrixData[comment.ext_table_row_index].splice(-1, 1);
+                        _this._matrixData[comment.ext_table_row_index].push({ qText: comment.comment, qState: "L" });
                     });
                 }
             }
@@ -207,6 +225,8 @@
             else {
                 this.maxY = 0;
             }
+            // set initial gui variable --> comment row size
+            this.calcColumnWidth(this.element.width());
         };
         // =================== Destory session object ============================================= //
         CommentTblCntrl.prototype.destroySessionObject = function () {
@@ -252,6 +272,21 @@
         // CREATE DIMENSION KEY ===================================================================================
         CommentTblCntrl.prototype.createDimKey = function (row) {
             return row.filter(function (col) { return col.qState !== "L"; }).map(function (cell) { return cell.qText; }).join(this.stringSeperator);
+        };
+        CommentTblCntrl.prototype.getSize = function () {
+            return {
+                height: this.element.height(),
+                width: this.element.width()
+            };
+        };
+        CommentTblCntrl.prototype.calcColumnWidth = function (extWidth) {
+            if (this.extCubeWidth) {
+                var regColumnWidth = 100;
+                var nbrOfClumns = this.extCubeWidth;
+                var padding = 20;
+                this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns) + padding)) + 'px';
+                console.log(this.commentColWidth);
+            }
         };
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http"];

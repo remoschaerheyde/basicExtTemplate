@@ -1,0 +1,39 @@
+
+.hy-comment-table-container {
+    height: 100%;
+    width: 100%;   
+}
+
+.hy-comment-table {
+    height: 100%;
+    width: 100%;
+}
+
+
+.hy-comment-table thead, .hy-comment-table tbody {
+    display: block;
+    width: 100%;
+}
+
+.hy-comment-table thead th, .hy-comment-table tbody td {
+    text-align: left;
+    cursor: pointer;
+    padding: 2px 0px 1px 0px;
+}
+
+.hy-comment-table thead {
+    height: 5%;
+    background: $hyVioletLight;
+    color: #fff;
+}
+
+.hy-comment-table tbody {
+    height: 95%;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid lightgray;
+}
+
+.hy-comment-table .hy-nonComment-col {
+    width: 100px;
+}
