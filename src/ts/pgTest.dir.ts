@@ -1,7 +1,5 @@
 import { utils } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import * as template from "text!../templates/pgTest.html";
-//import "css!../../node_modules/materialize-css/dist/css/materialize.min.css"
-//import "css!../../node_modules/bootstrap/dist/css/bootstrap.min.css"
 import "css!../css/main.css";
 
 interface IQVAngular {
@@ -52,7 +50,6 @@ class CommentTblCntrl implements ng.IController {
     private stringSeperator:string = '|';
 
     // dev
-
     private testActive:boolean = false;
     // end dev
 
@@ -154,18 +151,21 @@ class CommentTblCntrl implements ng.IController {
   }
 
   private setData(hyperCube: EngineAPI.IHyperCube) {
+
     if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
 
     this._matrixData = hyperCube.qDataPages[0].qMatrix;
+
     this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
+
     this.cubeWidthWithComments = this.extCubeWidth + 1;
     this.commentColIndex = this.extCubeWidth;
 
-      if((hyperCube as any).hyComments) {
-
+    if((hyperCube as any).hyComments) {
         (hyperCube as any).hyComments.forEach(comment => {
-          (this._matrixData[comment.ext_table_row_index] as any).splice(-1,1);
-          (this._matrixData[comment.ext_table_row_index] as any).push({qText: comment.comment , qState:"L"})
+           (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
+
+          (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
         });
       } 
     } else {
@@ -228,9 +228,11 @@ class CommentTblCntrl implements ng.IController {
           rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex) => {
               return {tableRowKey: this.createDimKey(row), tableRowIndex: rowIndex };
           });
-            
+
+
           }).then(() => {
             genericObject.getProperties().then((genObjProps:EngineAPI.IGenericObjectProperties) => {
+
               genObjProps.qHyperCubeDef.hyRowKeys = rowKeys;
               genericObject.setProperties(genObjProps).then(() => {
                 genericObject.getLayout().then((customHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
@@ -312,7 +314,6 @@ class CommentTblCntrl implements ng.IController {
       this.tblFooterHeight = 27;
       let totalVerticalBorders = 2;
       this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders)
-      
 
     }
 
@@ -330,16 +331,11 @@ class CommentTblCntrl implements ng.IController {
     // GET AUTHENTICATED USER
     this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
 
-
-
       // track changes of size
     that.scope.$watch("vm.getSize()", (newValue: ElementSize) => {
       that.calcCommentColWidth(newValue.width)
       that.calcTblHeight(newValue.height)
     }, true);
-
-
-  
 
     scope.$on("$destroy", function() {
       console.log('destroyed');

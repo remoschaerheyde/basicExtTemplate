@@ -10,8 +10,6 @@
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var template = require("text!../templates/pgTest.html");
-    //import "css!../../node_modules/materialize-css/dist/css/materialize.min.css"
-    //import "css!../../node_modules/bootstrap/dist/css/bootstrap.min.css"
     require("css!../css/main.css");
     var Comment = /** @class */ (function () {
         function Comment(dimKey, author, comment, dimensions, extensionId, extTblRowIndex) {
@@ -192,8 +190,8 @@
                 this.commentColIndex = this.extCubeWidth;
                 if (hyperCube.hyComments) {
                     hyperCube.hyComments.forEach(function (comment) {
-                        _this._matrixData[comment.ext_table_row_index].splice(-1, 1);
-                        _this._matrixData[comment.ext_table_row_index].push({ qText: comment.comment, qState: "L" });
+                        _this._matrixData[comment.tableRowIndex].splice(-1, 1);
+                        _this._matrixData[comment.tableRowIndex].push({ qText: comment.comment, qState: "L" });
                     });
                 }
             }

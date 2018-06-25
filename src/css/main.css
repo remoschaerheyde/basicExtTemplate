@@ -53,23 +53,14 @@
 .hy-comment-table .hy-nonComment-col {
   width: 100px; }
 
-.hy-comment-table tfoot {
+.hy-comment-table .hy-tbl-footer {
   display: block;
   background: #58585A;
   color: #fff;
+  padding-left: 3px;
+  padding-top: 3px;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px; }
-  .hy-comment-table tfoot tr td {
-    display: inline-block; }
-
-/* The starting CSS styles for the enter animation */
-.fade.ng-enter {
-  transition: 0.5s linear all;
-  opacity: 0; }
-
-/* The finishing CSS styles for the enter animation */
-.fade.ng-enter.ng-enter-active {
-  opacity: 1; }
 
 .hy-comment-emtpy-div {
   visibility: hidden; }

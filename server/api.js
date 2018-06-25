@@ -18,53 +18,29 @@ router.post('/comments/get_all', (req,res) => {
             console.log('connected to pool')
             let commentsFound = [];
 
-            new Promise((resolve, reject) => {
-                db.query(`SELECT id,dimkey from ${dbTable}`,(queryErr, table) => {
+            //new Promise((resolve, reject) => {
+                db.query(`SELECT id,dimkey,comment from ${dbTable}`,(queryErr, table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr)
                     } else {
-                        let dbRows = table.rows
-                
+                        let dbRows = table.rows   
                         commentsInQlikTable.forEach(tableRow => {
                             dbRows.forEach(dbRow => {
                                 if(dbRow.dimkey === tableRow.tableRowKey) {
-                                    commentsFound.push({indexInDb: dbRow.id, tblRowKey: tableRow.tableRowKey, tableRowIndex: tableRow.tableRowIndex})
+                                    commentsFound.push(
+                                        {
+                                         tableRowIndex: tableRow.tableRowIndex,
+                                         comment: dbRow.comment
+                                        }
+                                    )
                                 };
                             });
-                        });
-                        resolve(commentsFound)
+                        });            
+                        res.setHeader('Content-Type', 'application/json');
+                        res.status(200).send(JSON.stringify(commentsFound))
+                         db.end();
                     };
                 });
-            }).then(commentsFound => {
-            
-                function compare(a,b) {
-
-                    let comparison = 0;
-                    if (a.indexInDb > b.indexInDb) {
-                      comparison = 1;
-                    } else if (a.indexInDb < b.indexInDb) {
-                      comparison = -1;
-                    }
-                    return comparison;
-                  }
-                  
-                  let sortedQlikComments = commentsFound.sort(compare);
-                  let searchIndices = sortedQlikComments.map(commment => commment.indexInDb).join(',')
-
-                db.query(`SELECT id,dimkey,comment,ext_table_row_index FROM ${dbTable} WHERE id IN(${searchIndices})`, (queryErr,table) => {
-                    if(queryErr) {
-                        res.status(400).send(queryErr);
-                    } else {
-                        let dbComments = table.rows
-                    
-                        res.setHeader('Content-Type', 'application/json');
-                        res.status(200).send(JSON.stringify(dbComments))
-                         db.end();
-                    }
-                })
-            }).catch(err => {
-                console.log(err)
-            })
         }
     })
 } catch(err) {
