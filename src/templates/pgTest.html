@@ -1,42 +1,80 @@
 <div class="hy-comment-table-container lui-text-default">
-
-     <table class="hy-comment-table" >
-        <thead>
+    
+     <table class="hy-comment-table">
+        <thead ng-style="{'height': vm.tblHeaderHeight + 'px'}">
             <tr>
-                <th class="hy-nonComment-col" ng-repeat="dimInfo in vm._dimensionsInfo track by $index"><span>{{dimInfo.qGroupFallbackTitles[0]}}</span></th>
-                <th class="hy-nonComment-col" ng-repeat="measureInfo in vm._measureInfo track by $index"><span>{{measureInfo.qFallbackTitle}} </span></th>
-                <th class="hy-comment-col"><span>Comments</span></th>
+                <th class="hy-nonComment-col" ng-repeat="dimInfo in vm._dimensionsInfo track by $index" ng-style="{'height': vm.tblHeaderHeight + 'px'}">
+                    <div class="hy-tbl-header-item-container">
+                        <span class="lui-text-default">{{dimInfo.qGroupFallbackTitles[0]}}</span>
+                    </div>
+                </th>
+                <th class="hy-nonComment-col" ng-repeat="measureInfo in vm._measureInfo track by $index" ng-style="{'height': vm.tblHeaderHeight + 'px'}">
+                    <div class="hy-tbl-header-item-container">
+                        <span class="lui-text-default">{{measureInfo.qFallbackTitle}}</span>
+                    </div>
+                </th>
+                <th class="hy-comment-col" ng-style="{'width': vm.commentColWidth + 'px', 'height': vm.tblHeaderHeight + 'px'}">
+                    <div class="hy-tbl-header-item-container">
+                        <span class="lui-text-default">Comments</span>
+                    </div>
+                </th>
             </tr>
         </thead>
-        <tbody>
+        <tbody ng-style="{'height': vm.tblBodyHeight + 'px'}">
             <tr ng-repeat="row in vm._matrixData track by $index" ng-init="outerRowIndex = $index">
                 <td ng-repeat="cell in row track by $index" >
                     <!-- display row and measures -->
                     <div ng-if="$index !== vm.commentColIndex" class="hy-nonComment-col">
-        
-                            <span>{{cell.qText}}</span>
-                        
+                        <div class="hy-nonComment-col-container">
+                                <span>{{cell.qText}}</span>
+                        </div>
                     </div>
                     <!-- display comments -->
-                    <div ng-if="$index === vm.commentColIndex" class="hy-comment-col" ng-style="{'width': vm.commentColWidth}">
-                        <div class="hy-comment-display" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="vm.showEditForCell = outerRowIndex; vm.textAreaComment = cell.qText" ng-style="{'width': vm.commentColWidth}">
-                                <span class="hy-comment-text"> {{cell.qText}}</span>
-                        
-                               <span class="hy-comment-emtpy-div">.</span> 
-                        
+                    <div ng-if="$index === vm.commentColIndex" ng-style="{'width': vm.commentColWidth + 'px'}">
+                        <div class="hy-comment-display" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="vm.showEditForCell = outerRowIndex; vm.textAreaComment = cell.qText; vm.testTransition = !vm.testTransition" ng-style="{'width': vm.commentColWidth}">
+                            <span class="hy-comment-text"> {{cell.qText}}</span>
+                            <span class="hy-comment-emtpy-div">.</span> 
                         </div>
-                        <div class="hy-comment-edit" ng-show="vm.showEditForCell === outerRowIndex">
-                            <p>Edit</p>
-                                <textarea class="hy-comment-textarea" ng-model="vm.textAreaComment" ng-style="{'width': vm.commentColWidth}"></textarea>
-                            <br>
-                            <button class="lui-button" ng-click="vm.addOrUpdateComment(row, outerRowIndex); vm.showEditForCell = -1">Create/Update</button>
-                            <button class="lui-button" ng-click="vm.deleteComment(row); vm.showEditForCell = -1">Delete</button>
-                            <button class="lui-button" ng-click="vm.showEditForCell = -1">close</button>
+                        <div class="hy-comment-edit lui-dialog" ng-show="vm.showEditForCell === outerRowIndex">
+                            <div class="lui-dialog__header hy-comment-editCommentHeader">
+                                <div class="lui-dialog__title">
+                                    <span>Edit Comment</span>
+                        
+                                    <span class="hy-comment-closeBtn lui-icon lui-icon--close" ng-click="vm.showEditForCell = -1" aria-hidden="true"></span>
+                                </div>   
+                            </div>
+                            
+                            <div class="hy-comment-editCommentBody lui-dialog__body" ng-style="{'width': vm.commentColWidth + 'px'}">
+                                <textarea class="hy-comment-textarea lui-textarea" ng-model="vm.textAreaComment" ng-style="{'width': vm.commentColWidth + 'px'}" spellcheck="false"></textarea>
+                            </div>
+
+                            <div class="lui-dialog__footer hy-comment-editCommentFooter">
+                                <button class="lui-button lui-dialog__button" ng-click="vm.deleteComment(row); vm.showEditForCell = -1" ng-hide="cell.qText.length === 0">Delete comment</button>
+                                <button class="lui-button lui-dialog__button" ng-click="vm.addOrUpdateComment(row, outerRowIndex); vm.showEditForCell = -1">
+                                    <span ng-show="cell.qText.length === 0">Create new comment</span>
+                                    <span ng-hide="cell.qText.length === 0">Update comment</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </td>
             </tr>
         </tbody>
+
+        <tfoot class="hy-tbl-footer" ng-style="{'height': vm.tblFooterHeight + 'px'}">
+            <tr>
+                <td>
+                    <div class="hy-tbl-footer-item-container" ng-style="{'height': vm.tblFooterHeight + 'px'}">
+                        <div class="hy-tbl-footer-copyright-container">
+                            
+                                &copy; 2018 Heyde Schweiz AG
+                              
+                        </div>
+                    </div>
+                </td>    
+            </tr>
+        </tfoot>  
+
      </table>
 
  </div>        

@@ -51,6 +51,11 @@ class CommentTblCntrl implements ng.IController {
     private user: string;
     private stringSeperator:string = '|';
 
+    // dev
+
+    private testActive:boolean = false;
+    // end dev
+
 
   private _editMode: boolean;
   get editMode() {
@@ -126,14 +131,12 @@ class CommentTblCntrl implements ng.IController {
 
   private getDbComments = function(customHyperCubeLayout) {
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
-    console.log(comments);
     this.http({
       url: "http://localhost:5000/api/comments/get_all",
       method: "POST",
       data: { comments: JSON.stringify(comments) },
       headers: { "Content-Type": "application/json" }
     }).then(res => {
-        console.log(res);
         this._model.app.getObject(this._genericObjectId).then((sessionObj:EngineAPI.IGenericObjectProperties) => {
           sessionObj.getProperties().then(sessionObjProps => {
             sessionObjProps.qHyperCubeDef.hyComments = res.data
@@ -151,7 +154,6 @@ class CommentTblCntrl implements ng.IController {
   }
 
   private setData(hyperCube: EngineAPI.IHyperCube) {
-    console.log(hyperCube);
     if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
 
     this._matrixData = hyperCube.qDataPages[0].qMatrix;
@@ -162,7 +164,6 @@ class CommentTblCntrl implements ng.IController {
       if((hyperCube as any).hyComments) {
 
         (hyperCube as any).hyComments.forEach(comment => {
-          console.log(comment);
           (this._matrixData[comment.ext_table_row_index] as any).splice(-1,1);
           (this._matrixData[comment.ext_table_row_index] as any).push({qText: comment.comment , qState:"L"})
         });
@@ -187,7 +188,7 @@ class CommentTblCntrl implements ng.IController {
     }
 
     // set initial gui variable --> comment row size
-    this.calcColumnWidth(this.element.width())
+    this.calcCommentColWidth(this.element.width())
 
 
 
@@ -234,7 +235,7 @@ class CommentTblCntrl implements ng.IController {
               genericObject.setProperties(genObjProps).then(() => {
                 genericObject.getLayout().then((customHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
                     that.getDbComments(customHyperCubeLayout)
-                 })
+                })
               })
             })
           })
@@ -268,8 +269,6 @@ class CommentTblCntrl implements ng.IController {
 
       let dimKey:string = this.createDimKey(row);
 
-      let commentToDelete = {dimKey: dimKey}
-
       this.http({
         url: "http://localhost:5000/api/comments/delete_comment",
         method: "POST",
@@ -280,14 +279,7 @@ class CommentTblCntrl implements ng.IController {
         })
     }
 
-    private showScope = function() {
-
-      console.log(this.element[0].offsetHeight);
-      console.log(this.element[0].offsetWidth);
-    }
-
-
-    private tableSize:any
+ 
 
     private getSize(): ElementSize {
       return {
@@ -297,29 +289,34 @@ class CommentTblCntrl implements ng.IController {
     }
 
 
-    private commentColWidth:string
+    private commentColWidth:number;
     
-    private calcColumnWidth(extWidth) {
+    private calcCommentColWidth(extWidth) {
       if(this.extCubeWidth) {
         let regColumnWidth = 100
         let nbrOfClumns = this.extCubeWidth
-        let padding = 20
-        
-        this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns)+ padding)) + 'px'
-        console.log(this.commentColWidth);
-
-
+        let totalLeftCellBorders = (this.extCubeWidth * 1) + 1
+        let padding = 12;
+        this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns)+ padding + totalLeftCellBorders))
       }
+    }
+
+    private tblHeaderHeight: number;
+    private tblBodyHeight: number;
+    private tblFooterHeight: number;
+
+
+
+    private calcTblHeight(extHeight) {
+      this.tblHeaderHeight = 27;
+      this.tblFooterHeight = 27;
+      let totalVerticalBorders = 2;
+      this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders)
+      
 
     }
 
 
-
-    private tblHeight:string;
-    private tblHeadHeight:string;
-    private tblBodyHeight:string;
-    
-    
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];
@@ -333,21 +330,12 @@ class CommentTblCntrl implements ng.IController {
     // GET AUTHENTICATED USER
     this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
 
-    
-   // console.log(this.element.width())
-
-   // this.calcColumnWidth(this.element.width())
 
 
       // track changes of size
-      that.scope.$watch("vm.getSize()", (newValue: ElementSize) => {
-        let elemHeight = newValue.height;
-        let elemWidth = newValue.width;
-        that.calcColumnWidth(elemWidth)
-
-        
-
-        
+    that.scope.$watch("vm.getSize()", (newValue: ElementSize) => {
+      that.calcCommentColWidth(newValue.width)
+      that.calcTblHeight(newValue.height)
     }, true);
 
 

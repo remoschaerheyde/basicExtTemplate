@@ -4,55 +4,110 @@
 
 .hy-comment-table {
   height: 100%;
-  width: 100%; }
+  width: 100%;
+  border-collapse: collapse; }
 
-.hy-comment-table thead, .hy-comment-table tbody {
-  display: block;
-  width: 100%; }
-
-.hy-comment-table thead th, .hy-comment-table tbody td {
-  text-align: left;
-  cursor: pointer;
-  padding: 2px 0px 1px 0px; }
+.hy-comment-table tbody td div div.hy-comment-display,
+.hy-comment-table tbody td div.hy-nonComment-col div.hy-nonComment-col-container {
+  padding: 3px 0px 3px 3px; }
 
 .hy-comment-table thead {
-  height: 5%;
-  background: #A791BE;
-  color: #fff; }
+  display: inline-block;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  vertical-align: bottom;
+  width: 100%;
+  background: #58585A; }
+  .hy-comment-table thead :nth-child(1) {
+    border-left: none;
+    padding-left: 1px; }
+
+.hy-comment-table thead th {
+  text-align: left;
+  border-left: 1px solid #fff; }
+  .hy-comment-table thead th .hy-tbl-header-item-container {
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+    position: relative; }
+    .hy-comment-table thead th .hy-tbl-header-item-container span {
+      color: #fff;
+      position: absolute;
+      bottom: 0px;
+      left: 0px;
+      padding: 0px 0px 3px 3px;
+      font-weight: normal;
+      display: block; }
 
 .hy-comment-table tbody {
-  height: 95%;
+  display: block;
+  width: 100%;
   overflow-y: auto;
-  overflow-x: auto;
-  border: 1px solid lightgray; }
+  overflow-x: auto; }
+
+.hy-comment-table tbody td {
+  text-align: left;
+  border-left: 1px solid #E6E6E6;
+  border-bottom: 1px solid #f2f2f2; }
 
 .hy-comment-table .hy-nonComment-col {
   width: 100px; }
 
+.hy-comment-table tfoot {
+  display: block;
+  background: #58585A;
+  color: #fff;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px; }
+  .hy-comment-table tfoot tr td {
+    display: inline-block; }
+
+/* The starting CSS styles for the enter animation */
+.fade.ng-enter {
+  transition: 0.5s linear all;
+  opacity: 0; }
+
+/* The finishing CSS styles for the enter animation */
+.fade.ng-enter.ng-enter-active {
+  opacity: 1; }
+
 .hy-comment-emtpy-div {
   visibility: hidden; }
 
-.hy-comment-textarea {
-  height: 100px;
-  resize: none; }
+.hy-comment-display {
+  background: #fff;
+  word-wrap: normal;
+  border-radius: 0px; }
 
-.hy-comment-table .hy-comment-display:hover {
-  background: #A791BE;
+.hy-comment-display:hover {
+  background: #8B8B8D;
   color: #fff; }
 
-.hy-comment-display {
-  background: lightblue;
-  word-wrap: normal; }
+.hy-comment-edit {
+  box-shadow: none;
+  border: none; }
+  .hy-comment-edit .hy-comment-closeBtn {
+    float: right; }
+  .hy-comment-edit .hy-comment-editCommentBody {
+    padding: 0px;
+    margin: 0px; }
+    .hy-comment-edit .hy-comment-editCommentBody .hy-comment-textarea {
+      height: 100px;
+      resize: none;
+      width: 100%;
+      border-radius: 0px;
+      border: none; }
+  .hy-comment-edit .hy-comment-editCommentHeader {
+    background: #F1F1F3;
+    border-radius: 0px; }
+  .hy-comment-edit .hy-comment-editCommentFooter {
+    background: #F1F1F3;
+    border-radius: 0px; }
 
-.hy-comment-textPreviewArea {
-  height: 50px;
-  resize: none; }
-
-.hy-comment-text-preview {
-  resize: none;
-  height: 100px; }
-
-.testDiv {
-  background: red; }
+.hy-comment-textarea:focus {
+  outline: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none; }
 
 /*# sourceMappingURL=main.css.map */

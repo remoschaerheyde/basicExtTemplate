@@ -5,8 +5,12 @@ import * as template from "text!../templates/extension.html";
 import { ExampleDirectiveFactory } from "./pgTest.dir";
 import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import {registerDirective} from "./ngRegister";
-import extDefinition from "./definition"
-import initProps from "./initProps"
+import extDefinition from "./definition";
+import initProps from "./initProps";
+
+
+console.log(qvangular);
+
 
 qvangular.service<services.IRegistrationProvider>("$registrationProvider", services.RegistrationProvider).implementObject(qvangular);
 

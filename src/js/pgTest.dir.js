@@ -43,17 +43,17 @@
             this.scope = scope;
             this.http = http;
             this.stringSeperator = '|';
+            // dev
+            this.testActive = false;
             this.getDbComments = function (customHyperCubeLayout) {
                 var _this = this;
                 var comments = customHyperCubeLayout.qHyperCube.hyRowKeys;
-                console.log(comments);
                 this.http({
                     url: "http://localhost:5000/api/comments/get_all",
                     method: "POST",
                     data: { comments: JSON.stringify(comments) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
-                    console.log(res);
                     _this._model.app.getObject(_this._genericObjectId).then(function (sessionObj) {
                         sessionObj.getProperties().then(function (sessionObjProps) {
                             sessionObjProps.qHyperCubeDef.hyComments = res.data;
@@ -87,7 +87,6 @@
             this.deleteComment = function (row) {
                 var _this = this;
                 var dimKey = this.createDimKey(row);
-                var commentToDelete = { dimKey: dimKey };
                 this.http({
                     url: "http://localhost:5000/api/comments/delete_comment",
                     method: "POST",
@@ -97,22 +96,15 @@
                     _this._model.emit("changed");
                 });
             };
-            this.showScope = function () {
-                console.log(this.element[0].offsetHeight);
-                console.log(this.element[0].offsetWidth);
-            };
             var that = this;
             // GLOBAL OBJECT
             this.globalObj = that._model.session.app.global;
             // GET AUTHENTICATED USER
             this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
-            // console.log(this.element.width())
-            // this.calcColumnWidth(this.element.width())
             // track changes of size
             that.scope.$watch("vm.getSize()", function (newValue) {
-                var elemHeight = newValue.height;
-                var elemWidth = newValue.width;
-                that.calcColumnWidth(elemWidth);
+                that.calcCommentColWidth(newValue.width);
+                that.calcTblHeight(newValue.height);
             }, true);
             scope.$on("$destroy", function () {
                 console.log('destroyed');
@@ -193,7 +185,6 @@
         });
         CommentTblCntrl.prototype.setData = function (hyperCube) {
             var _this = this;
-            console.log(hyperCube);
             if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
                 this._matrixData = hyperCube.qDataPages[0].qMatrix;
                 this._matrixData.forEach(function (row) { return row.push({ qText: "", qState: "L" }); });
@@ -201,7 +192,6 @@
                 this.commentColIndex = this.extCubeWidth;
                 if (hyperCube.hyComments) {
                     hyperCube.hyComments.forEach(function (comment) {
-                        console.log(comment);
                         _this._matrixData[comment.ext_table_row_index].splice(-1, 1);
                         _this._matrixData[comment.ext_table_row_index].push({ qText: comment.comment, qState: "L" });
                     });
@@ -226,7 +216,7 @@
                 this.maxY = 0;
             }
             // set initial gui variable --> comment row size
-            this.calcColumnWidth(this.element.width());
+            this.calcCommentColWidth(this.element.width());
         };
         // =================== Destory session object ============================================= //
         CommentTblCntrl.prototype.destroySessionObject = function () {
@@ -279,14 +269,20 @@
                 width: this.element.width()
             };
         };
-        CommentTblCntrl.prototype.calcColumnWidth = function (extWidth) {
+        CommentTblCntrl.prototype.calcCommentColWidth = function (extWidth) {
             if (this.extCubeWidth) {
                 var regColumnWidth = 100;
                 var nbrOfClumns = this.extCubeWidth;
-                var padding = 20;
-                this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns) + padding)) + 'px';
-                console.log(this.commentColWidth);
+                var totalLeftCellBorders = (this.extCubeWidth * 1) + 1;
+                var padding = 12;
+                this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns) + padding + totalLeftCellBorders));
             }
+        };
+        CommentTblCntrl.prototype.calcTblHeight = function (extHeight) {
+            this.tblHeaderHeight = 27;
+            this.tblFooterHeight = 27;
+            var totalVerticalBorders = 2;
+            this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders);
         };
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http"];

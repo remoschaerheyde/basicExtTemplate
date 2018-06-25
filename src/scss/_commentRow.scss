@@ -3,30 +3,56 @@
     visibility: hidden;
 } 
 
-
-.hy-comment-textarea {
-    height: 100px;
-    resize: none;
+.hy-comment-display {
+    background:#fff;
+    word-wrap: normal;
+    border-radius: 0px;
 }
 
-
-.hy-comment-table .hy-comment-display:hover {
-    background: $hyVioletLight;
+.hy-comment-display:hover {
+    background: $tblHooverColor;
     color: #fff;
 }
 
-.hy-comment-display {
-    background: lightblue;
-    word-wrap: normal;
+.hy-comment-edit {
+    box-shadow: none;
+
+    border: none;
+
+    .hy-comment-closeBtn {
+        float: right;
+    }
+    .hy-comment-editCommentBody {
+        padding: 0px;
+        margin: 0px;
+
+        .hy-comment-textarea {
+            height: 100px;
+            resize: none;
+            width: 100%;
+            border-radius: 0px;
+            border: none;
+         
+        }
+    }
+
+    .hy-comment-editCommentHeader {
+        background: $editCommentBaseColor;
+        border-radius: 0px;
+    }
+
+    .hy-comment-editCommentFooter {
+        background: $editCommentBaseColor;
+        border-radius: 0px;
+    }
 }
 
-.hy-comment-textPreviewArea {
-    height: 50px;
-    resize: none;
+.hy-comment-textarea:focus {
+    outline: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
 }
 
 
-.hy-comment-text-preview {
-    resize: none;
-    height: 100px;
-}
+
