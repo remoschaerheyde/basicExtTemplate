@@ -14,14 +14,24 @@
     color: #fff;
 }
 
+
+
+.hy-closeBtnContainer {
+   display: block;
+   position: absolute;
+   right: 0px;
+   top: 3px;
+}
+
 .hy-comment-edit {
     box-shadow: none;
 
     border: none;
-
-    .hy-comment-closeBtn {
+    .hy-comment-editCloseBtn {
         float: right;
     }
+
+
     .hy-comment-editCommentBody {
         padding: 0px;
         margin: 0px;

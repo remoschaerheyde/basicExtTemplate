@@ -17,8 +17,6 @@ router.post('/comments/get_all', (req,res) => {
         } else {
             console.log('connected to pool')
             let commentsFound = [];
-
-            //new Promise((resolve, reject) => {
                 db.query(`SELECT id,dimkey,comment from ${dbTable}`,(queryErr, table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr)

@@ -1,4 +1,6 @@
 <div class="hy-comment-table-container lui-text-default">
+
+
     
      <table class="hy-comment-table">
         <thead ng-style="{'height': vm.tblHeaderHeight + 'px'}">
@@ -31,24 +33,32 @@
                     </div>
                     <!-- display comments -->
                     <div ng-if="$index === vm.commentColIndex" ng-style="{'width': vm.commentColWidth + 'px'}">
-                        <div class="hy-comment-display" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="vm.showEditForCell = outerRowIndex; vm.textAreaComment = cell.qText; vm.testTransition = !vm.testTransition" ng-style="{'width': vm.commentColWidth}">
+
+                        <!--display comments small-->
+                        <div class="hy-comment-display" ng-class="{'commentEditMode': commentEditMode}" ng-hide="vm.showEditForCell === outerRowIndex" 
+                            ng-click="cell.qText !== '' || commentEditMode === true ? vm.showEditForCell = outerRowIndex:  vm.showEditForCell =-1 ; vm.textAreaComment = cell.qText; vm.testTransition = !vm.testTransition" ng-style="{'width': vm.commentColWidth}">
                             <span class="hy-comment-text"> {{cell.qText}}</span>
                             <span class="hy-comment-emtpy-div">.</span> 
                         </div>
+
+                        <!-- display comments large -->
                         <div class="hy-comment-edit lui-dialog" ng-show="vm.showEditForCell === outerRowIndex">
-                            <div class="lui-dialog__header hy-comment-editCommentHeader">
+                            <div class="hy-closeBtnContainer" ng-if="!commentEditMode">
+                                    <span class="hy-comment-closeBtn lui-icon lui-icon--close" ng-click="vm.showEditForCell = -1" aria-hidden="true"></span>
+                            </div>
+                            
+                            <div class="lui-dialog__header hy-comment-editCommentHeader" ng-if="commentEditMode">
                                 <div class="lui-dialog__title">
                                     <span>Edit Comment</span>
-                        
-                                    <span class="hy-comment-closeBtn lui-icon lui-icon--close" ng-click="vm.showEditForCell = -1" aria-hidden="true"></span>
+                                    <span class="hy-comment-editCloseBtn lui-icon lui-icon--close" ng-click="vm.showEditForCell = -1" aria-hidden="true"></span>
                                 </div>   
                             </div>
                             
                             <div class="hy-comment-editCommentBody lui-dialog__body" ng-style="{'width': vm.commentColWidth + 'px'}">
-                                <textarea class="hy-comment-textarea lui-textarea" ng-model="vm.textAreaComment" ng-style="{'width': vm.commentColWidth + 'px'}" spellcheck="false"></textarea>
+                                <textarea class="hy-comment-textarea lui-textarea" ng-readonly="!commentEditMode" ng-model="vm.textAreaComment" ng-style="{'width': vm.commentColWidth + 'px'}" spellcheck="false"></textarea>
                             </div>
 
-                            <div class="lui-dialog__footer hy-comment-editCommentFooter">
+                            <div class="lui-dialog__footer hy-comment-editCommentFooter" ng-if="commentEditMode">
                                 <button class="lui-button lui-dialog__button" ng-click="vm.deleteComment(row); vm.showEditForCell = -1" ng-hide="cell.qText.length === 0">Delete comment</button>
                                 <button class="lui-button lui-dialog__button" ng-click="vm.addOrUpdateComment(row, outerRowIndex); vm.showEditForCell = -1">
                                     <span ng-show="cell.qText.length === 0">Create new comment</span>
@@ -63,15 +73,37 @@
 
         <tfoot class="hy-tbl-footer" ng-style="{'height': vm.tblFooterHeight + 'px'}">
             <tr>
+                <td ng-style="{'height': vm.tblFooterHeight + 'px'}">
+                        <div class="hy-tbl-footer-copyright-container" >
+                            <span>&copy; 2018 Heyde Schweiz AG</span>
+                        </div>
+                </td>
                 <td>
-                    <div class="hy-tbl-footer-item-container" ng-style="{'height': vm.tblFooterHeight + 'px'}">
-                        <div class="hy-tbl-footer-copyright-container">
-                            
-                                &copy; 2018 Heyde Schweiz AG
-                              
+                    <div class="hy-editModeLabelContainer">
+                        <span>Mode:</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="hy-editModeSwitchContainer">
+                            <div class="hy-editModeSwitch lui-switch">
+                                <label class="lui-switch__label">
+                                    <input ng-true-value="true" ng-false-value="false" ng-model="commentEditMode" type="checkbox" class="lui-switch__checkbox" aria-label="Label"/>                                <span class="lui-switch__wrap">
+                                        <span class="lui-switch__inner"></span>
+                                        <span class="lui-switch__switch"></span>
+                                    </span>
+                            </label>
                         </div>
                     </div>
                 </td>    
+                <td>
+                    <div>
+                        <span>{{ commentEditMode === true ? 'Edit': 'View'}}</span> 
+                    </div>
+                       
+                </td>
+            
+
+            
             </tr>
         </tfoot>  
 

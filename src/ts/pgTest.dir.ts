@@ -310,8 +310,8 @@ class CommentTblCntrl implements ng.IController {
 
 
     private calcTblHeight(extHeight) {
-      this.tblHeaderHeight = 27;
-      this.tblFooterHeight = 27;
+      this.tblHeaderHeight = 28;
+      this.tblFooterHeight = 28;
       let totalVerticalBorders = 2;
       this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders)
 
@@ -324,7 +324,8 @@ class CommentTblCntrl implements ng.IController {
 
   constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider) {
     const that: any = this;
-    
+
+
     // GLOBAL OBJECT
     this.globalObj = that._model.session.app.global;
 

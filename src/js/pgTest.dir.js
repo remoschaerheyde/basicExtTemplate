@@ -277,8 +277,8 @@
             }
         };
         CommentTblCntrl.prototype.calcTblHeight = function (extHeight) {
-            this.tblHeaderHeight = 27;
-            this.tblFooterHeight = 27;
+            this.tblHeaderHeight = 28;
+            this.tblFooterHeight = 28;
             var totalVerticalBorders = 2;
             this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders);
         };

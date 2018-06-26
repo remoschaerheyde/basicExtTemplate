@@ -41,6 +41,7 @@ export = {
     initialProperties: initProps,
     template: template,
     controller: ["$scope", function (scope: utils.IVMScope<ExampleExtension>) {
+        
         console.log("run controller of Extension")
         scope.vm = new ExampleExtension(utils.getEnigma(scope));
     }]
