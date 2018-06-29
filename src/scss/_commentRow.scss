@@ -1,68 +1,68 @@
 // helper class
-.hy-comment-emtpy-div {
+.hy-ctable__comment__h-empty-div {
     visibility: hidden;
-} 
+}
 
-.hy-comment-display {
+.hy-ctable__comment__view--small {
     background:#fff;
     word-wrap: normal;
     border-radius: 0px;
 }
 
-.hy-comment-display:hover {
+.hy-ctable__comment__view--small:hover {
     background: $tblHooverColor;
     color: #fff;
 }
 
-
-
-.hy-closeBtnContainer {
-   display: block;
-   position: absolute;
-   right: 0px;
-   top: 3px;
-}
-
-.hy-comment-edit {
+.hy-ctable__comment__view--large-preview {
     box-shadow: none;
-
     border: none;
-    .hy-comment-editCloseBtn {
+
+    .hy-ctable__comment__close-btn--edit {
         float: right;
     }
 
+    .hy-ctable__comment__close-btn--edit:hover {
+        color:$tblHooverColor;
+    }
 
-    .hy-comment-editCommentBody {
+    .hy-ctable__comment__edit-body {
         padding: 0px;
         margin: 0px;
 
-        .hy-comment-textarea {
+        .hy-ctable-comment-textarea {
             height: 100px;
             resize: none;
             width: 100%;
             border-radius: 0px;
             border: none;
-         
+            :focus {
+                outline: none;
+                -webkit-box-shadow: none;
+                -moz-box-shadow: none;
+                box-shadow: none;
+            }
         }
+ 
     }
 
-    .hy-comment-editCommentHeader {
+    .hy-ctable__comment__edit-header {
         background: $editCommentBaseColor;
         border-radius: 0px;
     }
 
-    .hy-comment-editCommentFooter {
+    .hy-ctable__comment__edit-footer {
         background: $editCommentBaseColor;
         border-radius: 0px;
     }
 }
 
-.hy-comment-textarea:focus {
-    outline: none;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-}
-
-
-
+.hy-ctable__comment__close-btn-container {
+    display: block;
+    position: absolute;
+    right: 1px;
+    top: 5px;
+    :hover {
+        color:$tblHooverColor;
+    }
+ }

@@ -43,15 +43,11 @@ class CommentTblCntrl implements ng.IController {
     private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
     private globalObj: any;
     private extCubeWidth: number;
-    private cubeWidth:number;
     private cubeWidthWithComments:number;
     private commentColIndex:number;
     private user: string;
     private stringSeperator:string = '|';
 
-    // dev
-    private testActive:boolean = false;
-    // end dev
 
 
   private _editMode: boolean;
@@ -115,8 +111,6 @@ class CommentTblCntrl implements ng.IController {
   public get measureInfo(): any {
     return this._measureInfo;
   }
-
-  private _data: any;
 
   private _maxY: number;
   public get maxY(): number {
@@ -224,12 +218,9 @@ class CommentTblCntrl implements ng.IController {
       
         let rowKeys;
         genericObject.getLayout().then((genHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
-
           rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex) => {
               return {tableRowKey: this.createDimKey(row), tableRowIndex: rowIndex };
           });
-
-
           }).then(() => {
             genericObject.getProperties().then((genObjProps:EngineAPI.IGenericObjectProperties) => {
 
@@ -298,7 +289,7 @@ class CommentTblCntrl implements ng.IController {
         let regColumnWidth = 100
         let nbrOfClumns = this.extCubeWidth
         let totalLeftCellBorders = (this.extCubeWidth * 1) + 1
-        let padding = 12;
+        let padding = 15;
         this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns)+ padding + totalLeftCellBorders))
       }
     }
@@ -314,16 +305,19 @@ class CommentTblCntrl implements ng.IController {
       this.tblFooterHeight = 28;
       let totalVerticalBorders = 2;
       this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders)
-
     }
 
 
+
+    
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];
 
   constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider) {
     const that: any = this;
+
+    console.log(this);
 
 
     // GLOBAL OBJECT

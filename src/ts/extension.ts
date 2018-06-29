@@ -9,13 +9,9 @@ import extDefinition from "./definition";
 import initProps from "./initProps";
 
 
-console.log(qvangular);
-
-
 qvangular.service<services.IRegistrationProvider>("$registrationProvider", services.RegistrationProvider).implementObject(qvangular);
 
 registerDirective(qvangular, ExampleDirectiveFactory(), "pgTest")
-
 
 
 class ExampleExtension {

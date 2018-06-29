@@ -1,24 +1,5 @@
 
-.hy-comment-table-container {
-    height: 100%;
-    width: 100%; 
-}
-
-.hy-comment-table {
-    height: 100%;
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.hy-comment-table tbody td div div.hy-comment-display,
-.hy-comment-table tbody td div.hy-nonComment-col div.hy-nonComment-col-container
-{
-    padding: 3px 0px 3px 3px;
-}
-
-
-
-.hy-comment-table thead {
+.hy-ctable thead {
     display: inline-block;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
@@ -32,7 +13,7 @@
 }
 
 
-.hy-comment-table thead th {
+.hy-ctable thead th {
     text-align: left;
     border-left: 1px solid $hdrFooterBorderColor;
     .hy-tbl-header-item-container {
@@ -51,22 +32,3 @@
         }
     }
 }
-
-.hy-comment-table tbody {
-    display: block;
-    width: 100%;
-    overflow-y: auto;
-    overflow-x: auto;
-}
-
-.hy-comment-table tbody td {
-    text-align: left;
-    border-left: 1px solid #E6E6E6;
-    border-bottom: 1px solid rgb(242,242,242);
-}
-
-.hy-comment-table .hy-nonComment-col {
-    width: 100px;
-}
-
-

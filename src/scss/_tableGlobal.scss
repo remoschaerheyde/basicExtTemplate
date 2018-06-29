@@ -1,0 +1,18 @@
+
+.hy-directive-container {
+    height: 100%;
+    width: 100%; 
+}
+
+.hy-ctable {
+    height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+.hy-ctable .hy-ctable__header__cell--regular,
+.hy-ctable .hy-ctable__body__cell--regular {
+    width: 100px;
+}
+

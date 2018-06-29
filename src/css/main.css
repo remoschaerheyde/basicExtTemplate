@@ -1,36 +1,36 @@
-.hy-comment-table-container {
+.hy-directive-container {
   height: 100%;
   width: 100%; }
 
-.hy-comment-table {
+.hy-ctable {
   height: 100%;
   width: 100%;
   border-collapse: collapse; }
 
-.hy-comment-table tbody td div div.hy-comment-display,
-.hy-comment-table tbody td div.hy-nonComment-col div.hy-nonComment-col-container {
-  padding: 3px 0px 3px 3px; }
+.hy-ctable .hy-ctable__header__cell--regular,
+.hy-ctable .hy-ctable__body__cell--regular {
+  width: 100px; }
 
-.hy-comment-table thead {
+.hy-ctable thead {
   display: inline-block;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   vertical-align: bottom;
   width: 100%;
   background: #58585A; }
-  .hy-comment-table thead :nth-child(1) {
+  .hy-ctable thead :nth-child(1) {
     border-left: none;
     padding-left: 1px; }
 
-.hy-comment-table thead th {
+.hy-ctable thead th {
   text-align: left;
   border-left: 1px solid #fff; }
-  .hy-comment-table thead th .hy-tbl-header-item-container {
+  .hy-ctable thead th .hy-tbl-header-item-container {
     display: inline-block;
     height: 100%;
     width: 100%;
     position: relative; }
-    .hy-comment-table thead th .hy-tbl-header-item-container span {
+    .hy-ctable thead th .hy-tbl-header-item-container span {
       color: #fff;
       position: absolute;
       bottom: 0px;
@@ -39,64 +39,87 @@
       font-weight: normal;
       display: block; }
 
-.hy-comment-table tbody {
+.hy-ctable tbody td div div.hy-ctable__comment__view--small,
+.hy-ctable tbody td div.hy-ctable__header__cell--regular div.hy-ctable__body__cell-text-container {
+  padding: 3px 0px 3px 3px; }
+
+.hy-ctable tbody {
   display: block;
   width: 100%;
   overflow-y: auto;
   overflow-x: auto; }
 
-.hy-comment-table tbody td {
+.hy-ctable tbody td {
   text-align: left;
   border-left: 1px solid #E6E6E6;
   border-bottom: 1px solid #f2f2f2; }
 
-.hy-comment-table .hy-nonComment-col {
-  width: 100px; }
+.hy-ctable .hy-tbl-footer {
+  display: block;
+  background: #58585A;
+  color: #fff;
+  padding-left: 3px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px; }
+  .hy-ctable .hy-tbl-footer tr td {
+    width: 100%; }
+  .hy-ctable .hy-tbl-footer tr td div.hy-editModeLabelContainer {
+    padding-right: 12px; }
+  .hy-ctable .hy-tbl-footer tr td div.hy-editModeSwitchContainer {
+    padding-right: 12px; }
+  .hy-ctable .hy-tbl-footer tr td:last-child {
+    padding-right: 12px; }
+    .hy-ctable .hy-tbl-footer tr td:last-child div {
+      width: 30px;
+      text-align: right; }
 
-.hy-comment-emtpy-div {
+.hy-ctable__comment__h-empty-div {
   visibility: hidden; }
 
-.hy-comment-display {
+.hy-ctable__comment__view--small {
   background: #fff;
   word-wrap: normal;
   border-radius: 0px; }
 
-.hy-comment-display:hover {
+.hy-ctable__comment__view--small:hover {
   background: #8B8B8D;
   color: #fff; }
 
-.hy-closeBtnContainer {
-  display: block;
-  position: absolute;
-  right: 0px;
-  top: 3px; }
-
-.hy-comment-edit {
+.hy-ctable__comment__view--large-preview {
   box-shadow: none;
   border: none; }
-  .hy-comment-edit .hy-comment-editCloseBtn {
+  .hy-ctable__comment__view--large-preview .hy-ctable__comment__close-btn--edit {
     float: right; }
-  .hy-comment-edit .hy-comment-editCommentBody {
+  .hy-ctable__comment__view--large-preview .hy-ctable__comment__close-btn--edit:hover {
+    color: #8B8B8D; }
+  .hy-ctable__comment__view--large-preview .hy-ctable__comment__edit-body {
     padding: 0px;
     margin: 0px; }
-    .hy-comment-edit .hy-comment-editCommentBody .hy-comment-textarea {
+    .hy-ctable__comment__view--large-preview .hy-ctable__comment__edit-body .hy-ctable-comment-textarea {
       height: 100px;
       resize: none;
       width: 100%;
       border-radius: 0px;
       border: none; }
-  .hy-comment-edit .hy-comment-editCommentHeader {
+      .hy-ctable__comment__view--large-preview .hy-ctable__comment__edit-body .hy-ctable-comment-textarea :focus {
+        outline: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none; }
+  .hy-ctable__comment__view--large-preview .hy-ctable__comment__edit-header {
     background: #fef0e2;
     border-radius: 0px; }
-  .hy-comment-edit .hy-comment-editCommentFooter {
+  .hy-ctable__comment__view--large-preview .hy-ctable__comment__edit-footer {
     background: #fef0e2;
     border-radius: 0px; }
 
-.hy-comment-textarea:focus {
-  outline: none;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none; }
+.hy-ctable__comment__close-btn-container {
+  display: block;
+  position: absolute;
+  right: 1px;
+  top: 5px; }
+  .hy-ctable__comment__close-btn-container :hover {
+    color: #8B8B8D; }
 
 .commentEditMode {
   background-color: #fffaf5 !important; }
@@ -105,23 +128,7 @@
   background: #8B8B8D !important;
   color: #fff !important; }
 
-.hy-comment-table .hy-tbl-footer {
-  display: block;
-  background: #58585A;
-  color: #fff;
-  padding-left: 3px;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px; }
-  .hy-comment-table .hy-tbl-footer tr td {
-    width: 100%; }
-  .hy-comment-table .hy-tbl-footer tr td div.hy-editModeLabelContainer {
-    padding-right: 12px; }
-  .hy-comment-table .hy-tbl-footer tr td div.hy-editModeSwitchContainer {
-    padding-right: 12px; }
-  .hy-comment-table .hy-tbl-footer tr td:last-child {
-    padding-right: 12px; }
-    .hy-comment-table .hy-tbl-footer tr td:last-child div {
-      width: 30px;
-      text-align: right; }
+.hy-ctable__comment-previewBorder {
+  border: 2px solid #8B8B8D; }
 
 /*# sourceMappingURL=main.css.map */

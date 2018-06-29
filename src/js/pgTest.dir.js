@@ -41,8 +41,6 @@
             this.scope = scope;
             this.http = http;
             this.stringSeperator = '|';
-            // dev
-            this.testActive = false;
             this.getDbComments = function (customHyperCubeLayout) {
                 var _this = this;
                 var comments = customHyperCubeLayout.qHyperCube.hyRowKeys;
@@ -95,6 +93,7 @@
                 });
             };
             var that = this;
+            console.log(this);
             // GLOBAL OBJECT
             this.globalObj = that._model.session.app.global;
             // GET AUTHENTICATED USER
@@ -272,7 +271,7 @@
                 var regColumnWidth = 100;
                 var nbrOfClumns = this.extCubeWidth;
                 var totalLeftCellBorders = (this.extCubeWidth * 1) + 1;
-                var padding = 12;
+                var padding = 15;
                 this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns) + padding + totalLeftCellBorders));
             }
         };
