@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pg = require('pg');
-const poolConfig = require('./dbConfig');
-const dbTable = 'testcomment2'
+const poolConfig = require('./dbConfig').poolConfig;
+const dbTable = require('./dbConfig').dbTable;
 
 // UPDATE MODEL
 router.post('/comments/get_all', (req,res) => {
@@ -16,7 +16,7 @@ router.post('/comments/get_all', (req,res) => {
         } else {
             console.log('connected to pool')
             let commentsFound = [];
-                db.query(`SELECT id,dimkey,comment from ${dbTable}`,(queryErr, table) => {
+                db.query(`SELECT dimkey,comment from ${dbTable}`, (queryErr, table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr)
                     } else {
@@ -24,11 +24,7 @@ router.post('/comments/get_all', (req,res) => {
                         commentsInQlikTable.forEach(tableRow => {
                             dbRows.forEach(dbRow => {
                                 if(dbRow.dimkey === tableRow.tableRowKey) {
-                                    commentsFound.push(
-                                        {
-                                         tableRowIndex: tableRow.tableRowIndex,
-                                         comment: dbRow.comment
-                                        }
+                                    commentsFound.push({tableRowIndex: tableRow.tableRowIndex, comment: dbRow.comment}
                                     )
                                 };
                             });
@@ -37,12 +33,12 @@ router.post('/comments/get_all', (req,res) => {
                         res.status(200).send(JSON.stringify(commentsFound))
                          db.end();
                     };
-                });
+            })
         }
     })
-} catch(err) {
-    console.log(err)
-}
+    } catch(err) {
+        console.log(err)
+    }
 })
 
 // ADDING / UPDATING COMMENTS
@@ -88,16 +84,15 @@ router.post('/comments/add_new_comment', (req,res) => {
             });
         }
     });
-} catch(err) {
-    console.log(err)
-}
+    } catch(err) {
+        console.log(err)
+    }
 })
 
 // DELETE SELECTED COMMENT
 router.post('/comments/delete_comment', (req,res) => {
 
     let pool = new pg.Pool(poolConfig)
-
     let dimKey = JSON.parse(req.body.dimKey)
 
     try {
