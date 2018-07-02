@@ -1,72 +1,66 @@
-import { utils } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import * as template from "text!../templates/pgTest.html";
 import "css!../css/main.css";
+import "./customInterfaces"
+import {Comment} from './commentClass';
 
-interface IQVAngular {
-  $injector: angular.auto.IInjectorService;
-}
 
-interface ElementSize {
-  height: number,
-  width: number
-}
-
-class Comment {
-  public dateTime: string = this.getDateTime();
-  public usedDimensions: string = this.createDimString();
-
-  private getDateTime(): string {
-    let currentdate: Date = new Date();
-    return `${currentdate.getDate()}/${currentdate.getMonth() +
-      1}/${currentdate.getFullYear()}|${currentdate.getHours()}:${currentdate.getMinutes()}:${currentdate.getSeconds()}`;
-  }
-
-  private createDimString(): string {
-    let dimString = this.dimensions.map((dim:EngineAPI.INxDimensionInfo) => dim.qGroupFallbackTitles[0]).join('|');
-    delete this.dimensions
-    return dimString;
-  }
-
-  constructor(
-    private dimKey: string,
-    private author: string,
-    private comment: string,
-    private dimensions: any,
-    private extensionId: string,
-    private extTblRowIndex: number
-  ) {}
-}
 
 class CommentTblCntrl implements ng.IController {
 
-    private _model: EngineAPI.IGenericObject;
-    private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
-    private globalObj: any;
-    private extCubeWidth: number;
-    private cubeWidthWithComments:number;
-    private commentColIndex:number;
-    private user: string;
-    private stringSeperator:string = '|';
+  private _model: EngineAPI.IGenericObject;
+  private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
+  private globalObj: any;
+  private extCubeWidth: number;
+  private cubeWidthWithComments:number;
+  private commentColIndex:number;
+  private user: string;
+  private stringSeperator:string = '|';
+  private showEditForCell: number;
+  private _matrixData:EngineAPI.INxCellRows[];
+  private textAreaComment:string;
+  private _dimensionsInfo: any;
+  private _genericObjectId: string;
+  private apiCommentRoute:string = 'http://localhost:5000/api/comments/';
+  private tblHeaderHeight: number;
+  private tblBodyHeight: number;
+  private tblFooterHeight: number;
+  private commentColWidth:number;
 
-
+  public get dimensionsInfo(): any {
+    return this._dimensionsInfo;
+  }
+  
+  private _measureInfo: any;
+  public get measureInfo(): any {
+    return this._measureInfo;
+  }
+  
+  private _maxY: number;
+  public get maxY(): number {
+    return this._maxY;
+  }
+  public set maxY(v: number) {
+    this._maxY = v;
+  }
 
   private _editMode: boolean;
   get editMode() {
     return this._editMode;
   }
+
   set editMode(v: boolean) {
     this._editMode = v;
   }
-
-  // Model ==================================================================================
 
   get model(): EngineAPI.IGenericObject {
     return this._model;
   }
   set model(v: EngineAPI.IGenericObject) {
     this._model = v;
-    this.modelChanged();
+  this.modelChanged();
   }
+
+  // Model ==================================================================================
 
   private modelChanged() {
     let that = this;
@@ -92,109 +86,80 @@ class CommentTblCntrl implements ng.IController {
             that._hyperCubeDef = hyperCubeDef;
           })
           .then(() => that.destroySessionObject())
-          .then(() => that.createSessionObject());
+          .then(() => that.createSessionObject())
+          .then(() => that.initGuiVars())
       });
       that._model.emit("changed");
     }
   }
 
   // ================== Set the data of the session object ================================//
-  private _matrixData: EngineAPI.INxCellRows[];
-
-  private _dimensionsInfo: any;
-  private _genericObjectId: string;
-  public get dimensionsInfo(): any {
-    return this._dimensionsInfo;
-  }
-
-  private _measureInfo: any;
-  public get measureInfo(): any {
-    return this._measureInfo;
-  }
-
-  private _maxY: number;
-  public get maxY(): number {
-    return this._maxY;
-  }
-  public set maxY(v: number) {
-    this._maxY = v;
-  }
-
   private getDbComments = function(customHyperCubeLayout) {
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
     this.http({
-      url: "http://localhost:5000/api/comments/get_all",
+      url: this.apiCommentRoute + "get_all",
       method: "POST",
       data: { comments: JSON.stringify(comments) },
       headers: { "Content-Type": "application/json" }
     }).then(res => {
         this._model.app.getObject(this._genericObjectId).then((sessionObj:EngineAPI.IGenericObjectProperties) => {
-          sessionObj.getProperties().then(sessionObjProps => {
-            sessionObjProps.qHyperCubeDef.hyComments = res.data
+          sessionObj.getProperties().then((sessionObjProps:EngineAPI.IGenericObjectProperties) => {
+            sessionObjProps.qHyperCubeDef.hyComments = res.data;
             sessionObj.setProperties(sessionObjProps).then(() => {
-              sessionObj.getLayout().then(newCubeLayoutWithComments => {
+              sessionObj.getLayout().then((newCubeLayoutWithComments: EngineAPI.IGenericHyperCubeLayout) => {
                 this.setData(newCubeLayoutWithComments.qHyperCube);
-              })
-            })
-          })  
-        })
+              }).catch(err =>  console.log('could not get customised hypercube layout', err))
+            }).catch(err =>  console.log('could not set custom cube properties', err))
+          }).catch(err =>  console.log('could not get generic object properties', err))
+        }).catch(err =>  console.log('could not get generic object', err))
     }).catch(err => {
       console.log('no comments from api received');
       this.setData(customHyperCubeLayout.qHyperCube)
     })
   }
 
-  private setData(hyperCube: EngineAPI.IHyperCube) {
-
-    if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
-
-    this._matrixData = hyperCube.qDataPages[0].qMatrix;
-
-    this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
-
-    this.cubeWidthWithComments = this.extCubeWidth + 1;
-    this.commentColIndex = this.extCubeWidth;
-
-    if((hyperCube as any).hyComments) {
-        (hyperCube as any).hyComments.forEach(comment => {
-           (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
-
-          (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
-        });
-      } 
-    } else {
-    this._matrixData = [];
+  private setData(hyperCube: customHyperCube) {
+    try {
+      if (hyperCube.qDataPages && hyperCube.qDataPages.length > 0) {
+        this._matrixData = hyperCube.qDataPages[0].qMatrix;
+        this._matrixData.forEach((row:any) => row.push({qText: "", qState:"L"}));
+        this.cubeWidthWithComments = this.extCubeWidth + 1;
+        this.commentColIndex = this.extCubeWidth;
+    
+        if(hyperCube.hyComments) {
+            hyperCube.hyComments.forEach((comment:commentRow) => {
+              (this._matrixData[comment.tableRowIndex] as any).splice(-1,1);
+              (this._matrixData[comment.tableRowIndex] as any).push({qText: comment.comment , qState:"L"})
+            });
+          }
+        } else {
+        this._matrixData = [];
+        }
+        // set Dimension Information
+        if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
+          this._dimensionsInfo = hyperCube.qDimensionInfo;
+        } else {
+          this._dimensionsInfo = [];
+        }
+        // set Measure Information
+        if (hyperCube.qMeasureInfo && (hyperCube.qMeasureInfo as any).length > 0) {
+          this._measureInfo = hyperCube.qMeasureInfo;
+          this.maxY = hyperCube.qMeasureInfo[0].qMax;
+        } else {
+          this.maxY = 0;
+        }
+    } catch(err) {
+      console.log('could not set data', err);
     }
-
-    // set Dimension Information
-    if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
-    this._dimensionsInfo = hyperCube.qDimensionInfo;
-    } else {
-    this._dimensionsInfo = [];
-    }
-          
-    // set Measure Information
-    if (hyperCube.qMeasureInfo && (hyperCube.qMeasureInfo as any).length > 0) {
-    this._measureInfo = hyperCube.qMeasureInfo;
-    this.maxY = hyperCube.qMeasureInfo[0].qMax;
-    } else {
-    this.maxY = 0;
-    }
-
-    // set initial gui variable --> comment row size
-    this.calcCommentColWidth(this.element.width())
-
-
-
   }
-  // =================== Destory session object ============================================= //
+
   
+  // =================== Destory session object ============================================= //
   private destroySessionObject() {
     let that = this;
     if (that._genericObjectId !== undefined) {
       // destroy session object
-      that.model.app
-        .destroySessionObject(that._genericObjectId)
+      that.model.app.destroySessionObject(that._genericObjectId)
         .then((result: any) => {
           // nothing to do
         });
@@ -205,7 +170,6 @@ class CommentTblCntrl implements ng.IController {
 
   private createSessionObject() {
     let that = this;
-
     let hyperCubeProp: EngineAPI.IGenericObjectProperties = {
       qInfo: {qId: "",qType: "HyperCube"},
       qHyperCubeDef: this._hyperCubeDef
@@ -216,109 +180,92 @@ class CommentTblCntrl implements ng.IController {
       .then((genericObject: EngineAPI.IGenericObject) => {
         this._genericObjectId = genericObject.id;
       
-        let rowKeys;
+        let rowKeys:{tableRowKey:string, tableRowIndex:number}[];
+
         genericObject.getLayout().then((genHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
-          rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex) => {
+          rowKeys = genHyperCubeLayout.qHyperCube.qDataPages[0].qMatrix.map((row:any, rowIndex:number) => {
               return {tableRowKey: this.createDimKey(row), tableRowIndex: rowIndex };
           });
           }).then(() => {
             genericObject.getProperties().then((genObjProps:EngineAPI.IGenericObjectProperties) => {
-
               genObjProps.qHyperCubeDef.hyRowKeys = rowKeys;
               genericObject.setProperties(genObjProps).then(() => {
                 genericObject.getLayout().then((customHyperCubeLayout: EngineAPI.IGenericHyperCubeLayout) => {
                     that.getDbComments(customHyperCubeLayout)
-                })
-              })
-            })
-          })
-    });
-  }
-
-  // CREATE DIMENSION KEY ===================================================================================
+                }).catch(err => console.log('could not get the custom hypercube layout of the session object', err))
+              }).catch(err => console.log('could not set session object hypercube properties with rowkeys', err))
+            }).catch(err => console.log('could not get generic object properties of session object', err))
+          }).catch(err => console.log('could not get the generic hypercube layout of the session object', err))
+      }).catch(err => console.log('could not create session object', err));
+    }
   private createDimKey(row:EngineAPI.INxCellRows):string {
     return (row as any).filter(col => col.qState !== "L").map(cell => cell.qText).join(this.stringSeperator)
   }
 
-  private addOrUpdateComment = function(row:EngineAPI.INxCellRows, rowIndex:number) {
-   
-    let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id, rowIndex)
+  // ================== API CALLS =======================================//
+  private addOrUpdateComment = function(row:EngineAPI.INxCellRows) {
+    let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id)
+
     this.http({
-      url: "http://localhost:5000/api/comments/add_new_comment",
+      url: this.apiCommentRoute +  "add_new_comment",
       method: "POST",
       data: { newComment: JSON.stringify(newComment) },
       headers: { "Content-Type": "application/json" }
-    }).then(res => {
-    
-        this._model.emit("changed");
-      }).catch(err => {
-        console.log(err);
-      })
-
-    this.textAreaComment = "";
+    }).then(res => this._model.emit("changed")
+    ).catch(err => console.log('could not add new comment',err))
   }
 
-    private deleteComment = function(row:EngineAPI.INxCellRows) { 
+  private deleteComment = function(row:EngineAPI.INxCellRows) { 
+    let dimKey:string = this.createDimKey(row);
+    this.http({
+      url: this.apiCommentRoute + "delete_comment",
+      method: "POST",
+      data: {dimKey: JSON.stringify(dimKey) },
+      headers: { "Content-Type": "application/json" }
+    }).then(res => this._model.emit("changed")
+    ).catch(err => console.log('could not delete comment',err))
+  }
 
-      let dimKey:string = this.createDimKey(row);
+    // ================== GUI RELATED FUNCTIONS =======================================//
 
-      this.http({
-        url: "http://localhost:5000/api/comments/delete_comment",
-        method: "POST",
-        data: {dimKey: JSON.stringify(dimKey) },
-        headers: { "Content-Type": "application/json" }
-      }).then(res => {
-          this._model.emit("changed");
-        })
-    }
-
- 
-
-    private getSize(): ElementSize {
-      return {
+  private getSize(): ElementSize {
+    return {
           height: this.element.height(),
           width: this.element.width()
       };
     }
 
-
-    private commentColWidth:number;
-    
-    private calcCommentColWidth(extWidth) {
+    private calcCommentColWidth(extWidth:number) {
+  
       if(this.extCubeWidth) {
-        let regColumnWidth = 100
-        let nbrOfClumns = this.extCubeWidth
-        let totalLeftCellBorders = (this.extCubeWidth * 1) + 1
-        let padding = 15;
+        let regColumnWidth:number = 100
+        let nbrOfClumns:number = this.extCubeWidth
+        let totalLeftCellBorders:number = (this.extCubeWidth * 1) + 1
+        let padding:number = 15;
         this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns)+ padding + totalLeftCellBorders))
       }
     }
 
-    private tblHeaderHeight: number;
-    private tblBodyHeight: number;
-    private tblFooterHeight: number;
-
-
-
-    private calcTblHeight(extHeight) {
+    private calcTblHeight(extHeight:number) {
       this.tblHeaderHeight = 28;
       this.tblFooterHeight = 28;
-      let totalVerticalBorders = 2;
+      let totalVerticalBorders:number = 2;
       this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders)
     }
 
-
-
+    private initGuiVars() {
+      this.calcCommentColWidth(this.element.width())
+      this.showEditForCell = -1;
+      this.textAreaComment = "";
+    }
     
+
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http"];
 
   constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider) {
     const that: any = this;
-
-    console.log(this);
-
 
     // GLOBAL OBJECT
     this.globalObj = that._model.session.app.global;
@@ -330,7 +277,7 @@ class CommentTblCntrl implements ng.IController {
     that.scope.$watch("vm.getSize()", (newValue: ElementSize) => {
       that.calcCommentColWidth(newValue.width)
       that.calcTblHeight(newValue.height)
-    }, true);
+      }, true);
 
     scope.$on("$destroy", function() {
       console.log('destroyed');

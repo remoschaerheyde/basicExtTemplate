@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const pg = require('pg');
 const poolConfig = require('./dbConfig');
-
 const dbTable = 'testcomment2'
 
 // UPDATE MODEL
@@ -67,7 +66,7 @@ router.post('/comments/add_new_comment', (req,res) => {
                             // comment does not alreay exist in db
                             console.log(`no comment with key ${newComment.dimKey} found `)
 
-                            db.query(`INSERT INTO ${dbTable}(dimkey, comment, last_author, last_update, extension_id, used_dimensions, ext_table_row_index) VALUES($1,$2,$3,$4,$5,$6, $7)`, [newComment.dimKey, newComment.comment, newComment.author, newComment.dateTime, newComment.extensionId, newComment.usedDimensions, newComment.extTblRowIndex], (queryErr,table) => {
+                            db.query(`INSERT INTO ${dbTable}(dimkey, comment, last_author, last_update, extension_id, used_dimensions) VALUES($1,$2,$3,$4,$5,$6)`, [newComment.dimKey, newComment.comment, newComment.author, newComment.dateTime, newComment.extensionId, newComment.usedDimensions], (queryErr,table) => {
                                 if(queryErr) {
                                     res.status(400).send(queryErr)
                                 } else {

@@ -1,58 +1,54 @@
 <div class="hy-directive-container">
-
      <table class="hy-ctable">
-        <thead ng-style="{'height': vm.tblHeaderHeight + 'px'}">
+        <thead class="hy-ctable__header" ng-style="{'height': vm.tblHeaderHeight + 'px'}">
             <tr>
-                <th class="hy-ctable__header__cell--regular" ng-repeat="dimInfo in vm._dimensionsInfo track by $index" ng-style="{'height': vm.tblHeaderHeight + 'px'}">
-                    <div class="hy-tbl-header-item-container">
-                        <span >{{dimInfo.qGroupFallbackTitles[0]}}</span>
+                <th class="hy-ctable__header__item hy-ctable__header__item--regular" ng-repeat="dimInfo in vm._dimensionsInfo track by $index" ng-style="{'height': vm.tblHeaderHeight + 'px'}">
+                    <div class="hy-ctable__header__item__container">
+                        <span class="hy-ctable__header__item__text">{{dimInfo.qGroupFallbackTitles[0]}}</span>
                     </div>
                 </th>
-                <th class="hy-ctable__header__cell--regular" ng-repeat="measureInfo in vm._measureInfo track by $index" ng-style="{'height': vm.tblHeaderHeight + 'px'}">
-                    <div class="hy-tbl-header-item-container">
-                        <span>{{measureInfo.qFallbackTitle}}</span>
+                <th class="hy-ctable__header__item hy-ctable__header__item--regular" ng-repeat="measureInfo in vm._measureInfo track by $index" ng-style="{'height': vm.tblHeaderHeight + 'px'}">
+                    <div class="hy-ctable__header__item__container">
+                        <span class="hy-ctable__header__item__text">{{measureInfo.qFallbackTitle}}</span>
                     </div>
                 </th>
-                <th ng-style="{'width': vm.commentColWidth + 'px', 'height': vm.tblHeaderHeight + 'px'}">
-                    <div class="hy-tbl-header-item-container">
-                        <span>Comments</span>
+                <th class="hy-ctable__header__item" ng-style="{'width': vm.commentColWidth + 'px', 'height': vm.tblHeaderHeight + 'px'}">
+                    <div class="hy-ctable__header__item__container">
+                        <span class="hy-ctable__header__item__text">Comments</span>
                     </div>
                 </th>
             </tr>
         </thead>
-        <tbody ng-style="{'height': vm.tblBodyHeight + 'px'}">
+        <tbody class="hy-ctable__body" ng-style="{'height': vm.tblBodyHeight + 'px'}">
             <tr ng-repeat="row in vm._matrixData track by $index" ng-init="outerRowIndex = $index">
-                <td ng-repeat="cell in row track by $index" >
+                <td class="hy-ctable__body__cell" ng-repeat="cell in row track by $index" >
                     <!-- display row and measures -->
-                    <div ng-if="$index !== vm.commentColIndex" class="hy-ctable__body__cell--regular">
-                        <div class="hy-ctable__body__cell-text-container">
-                                <span>{{cell.qText}}</span>
-                        </div>
+                
+                    <div class="hy-ctable__body__cell__container hy-ctable__body__cell--regular" ng-if="$index !== vm.commentColIndex" >
+                        <span class="hy-ctable__body__cell__text">{{cell.qText}}</span>
                     </div>
+                    
                     <!--================= display comments ==================================================== -->
                     <div ng-if="$index === vm.commentColIndex" class="hy-ctable__comment-container" ng-style="{'width': vm.commentColWidth + 'px'}">
-
-                        <div class="hy-ctable__comment__view--small" ng-class="{'commentEditMode': vm.commentEditMode}" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="cell.qText !== '' || vm.commentEditMode === true ? vm.showEditForCell = outerRowIndex:  vm.showEditForCell =-1 ; vm.textAreaComment = cell.qText; vm.testTransition = !vm.testTransition" ng-style="{'width': vm.commentColWidth}">
-                            <span class="hy-comment-text"> {{cell.qText}}</span>
+                        <div class="hy-ctable__comment__view--small" ng-class="{'commentEditMode': vm.commentEditMode}" ng-hide="vm.showEditForCell === outerRowIndex" 
+                                ng-click="cell.qText !== '' || vm.commentEditMode === true ? vm.showEditForCell = outerRowIndex:  vm.showEditForCell =-1 ; vm.textAreaComment = cell.qText;" ng-style="{'width': vm.commentColWidth}">
+                            <span class="hy-ctable__body__cell__text"> {{cell.qText}}</span>
                             <span class="hy-ctable__comment__h-empty-div">.</span> 
                         </div>
                         <!-- display comments large -->
                         <div class="hy-ctable__comment__view--large-preview lui-dialog" ng-show="vm.showEditForCell === outerRowIndex">
                             <div class="hy-ctable__comment__close-btn-container" ng-if="!vm.commentEditMode">
-                                <span class = "lui-icon lui-icon--close" ng-click="vm.showEditForCell = -1" aria-hidden="true"></span>
+                                <span class="lui-icon lui-icon--close" ng-click="vm.showEditForCell = -1" aria-hidden="true"></span>
                             </div>
-
                             <div class="lui-dialog__header hy-ctable__comment__edit-header" ng-if="vm.commentEditMode">
                                 <div class="lui-dialog__title">
                                     <span>Edit Comment</span>
                                     <span class="hy-ctable__comment__close-btn--edit lui-icon lui-icon--close" ng-click="vm.showEditForCell = -1" aria-hidden="true"></span>
                                 </div>   
                             </div>
-                            
                             <div class="hy-ctable__comment__edit-body lui-dialog__body" ng-class="{'hy-ctable__comment-previewBorder': !vm.commentEditMode}" ng-style="{'width': vm.commentColWidth + 'px'}">
-                                <textarea class="hy-ctable-comment-textarea lui-textarea" ng-readonly="!vm.commentEditMode" ng-model="vm.textAreaComment" ng-style="{'width': vm.commentColWidth + 'px'}" spellcheck="false"></textarea>
+                                <textarea class="hy-ctable__comment__textarea lui-textarea" ng-readonly="!vm.commentEditMode" ng-model="vm.textAreaComment" ng-style="{'width': vm.commentColWidth + 'px'}" spellcheck="false"></textarea>
                             </div>
-
                             <div class="lui-dialog__footer hy-ctable__comment__edit-footer" ng-if="vm.commentEditMode">
                                 <button class="lui-button lui-dialog__button" ng-click="vm.deleteComment(row); vm.showEditForCell = -1" ng-hide="cell.qText.length === 0">Delete comment</button>
                                 <button class="lui-button lui-dialog__button" ng-click="vm.addOrUpdateComment(row, outerRowIndex); vm.showEditForCell = -1">
@@ -65,43 +61,37 @@
                 </td>
             </tr>
         </tbody>
-
-        <tfoot class="hy-tbl-footer" ng-style="{'height': vm.tblFooterHeight + 'px'}">
+        <tfoot class="hy-ctable__footer" ng-style="{'height': vm.tblFooterHeight + 'px'}">
             <tr>
-                <td ng-style="{'height': vm.tblFooterHeight + 'px'}">
-                        <div class="hy-tbl-footer-copyright-container" >
-                            <span>&copy; 2018 Heyde Schweiz AG</span>
-                        </div>
+                <td class="hy-ctable__footer__item" ng-style="{'height': vm.tblFooterHeight + 'px'}">
+                    <div class="hy-tbl-footer-copyright-container" >
+                        <span>&copy; 2018 Heyde Schweiz AG</span>
+                    </div>
                 </td>
-                <td>
-                    <div class="hy-editModeLabelContainer">
+                <td class="hy-ctable__footer__item">
+                    <div class="hy-ctable__editMode__label-container">
                         <span>Mode:</span>
                     </div>
                 </td>
-                <td>
-                    <div class="hy-editModeSwitchContainer">
-                            <div class="hy-editModeSwitch lui-switch">
-                                <label class="lui-switch__label">
-                                    <input ng-true-value="true" ng-false-value="false" ng-model="vm.commentEditMode" type="checkbox" class="lui-switch__checkbox" aria-label="Label"/>                                <span class="lui-switch__wrap">
-                                        <span class="lui-switch__inner"></span>
-                                        <span class="lui-switch__switch"></span>
-                                    </span>
+                <td class="hy-ctable__footer__item">
+                    <div class="hy-ctable__editMode__switch-container">
+                        <div class="lui-switch">
+                            <label class="lui-switch__label">
+                                <input ng-true-value="true" ng-false-value="false" ng-model="vm.commentEditMode" type="checkbox" class="lui-switch__checkbox" aria-label="Label"/>                               
+                                <span class="lui-switch__wrap">
+                                    <span class="lui-switch__inner"></span>
+                                    <span class="lui-switch__switch"></span>
+                               </span>
                             </label>
                         </div>
                     </div>
-                </td>    
-                <td>
+                </td>
+                <td class="hy-ctable__footer__item">
                     <div>
                         <span>{{vm.commentEditMode === true ? 'Edit': 'View'}}</span> 
-                    </div>
-                       
+                    </div>   
                 </td>
-            
-
-            
             </tr>
         </tfoot>  
-
      </table>
-
  </div>        
