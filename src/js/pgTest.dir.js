@@ -68,6 +68,9 @@
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not delete comment', err); });
             };
             var that = this;
+            console.log(this);
+            // that.scope.$emit('saveProperties') )
+            this._propertiesPanel = that._model.layout.custom;
             // GLOBAL OBJECT
             this.globalObj = that._model.session.app.global;
             // GET AUTHENTICATED USER
@@ -77,6 +80,9 @@
                 that.calcCommentColWidth(newValue.width);
                 that.calcTblHeight(newValue.height);
             }, true);
+            that.scope.$watch("vm._propertiesPanel.commentEditMode", function (newValue) {
+                that.commentEditMode = newValue;
+            });
             scope.$on("$destroy", function () {
                 console.log('destroyed');
                 that.destroySessionObject();

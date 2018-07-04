@@ -62,15 +62,6 @@
   border-bottom-right-radius: 4px; }
   .hy-ctable__footer .hy-ctable__footer__item {
     width: 100%; }
-  .hy-ctable__footer .hy-ctable__footer__item:last-child {
-    padding-right: 12px; }
-    .hy-ctable__footer .hy-ctable__footer__item:last-child div {
-      width: 30px;
-      text-align: right; }
-  .hy-ctable__footer .hy-ctable__editMode__label-container {
-    padding-right: 12px; }
-  .hy-ctable__footer .hy-ctable__editMode__switch-container {
-    padding-right: 12px; }
 
 .hy-ctable__comment__h-empty-div {
   visibility: hidden; }

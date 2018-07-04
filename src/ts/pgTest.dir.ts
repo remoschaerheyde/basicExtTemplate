@@ -259,6 +259,8 @@ class CommentTblCntrl implements ng.IController {
       this.textAreaComment = "";
     }
     
+    private _propertiesPanel: object;
+
 
 
   // ============================== injector / Constructor ======================================================
@@ -266,6 +268,17 @@ class CommentTblCntrl implements ng.IController {
 
   constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider) {
     const that: any = this;
+
+   
+    console.log(this);
+   
+   // that.scope.$emit('saveProperties') )
+
+
+    this._propertiesPanel = that._model.layout.custom
+
+
+
 
     // GLOBAL OBJECT
     this.globalObj = that._model.session.app.global;
@@ -278,6 +291,15 @@ class CommentTblCntrl implements ng.IController {
       that.calcCommentColWidth(newValue.width)
       that.calcTblHeight(newValue.height)
       }, true);
+
+
+    that.scope.$watch("vm._propertiesPanel.commentEditMode", (newValue:boolean) => {
+        that.commentEditMode = newValue;
+    })
+  
+ 
+
+
 
     scope.$on("$destroy", function() {
       console.log('destroyed');

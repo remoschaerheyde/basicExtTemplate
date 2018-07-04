@@ -21,7 +21,6 @@
     ngRegister_1.registerDirective(qvangular, pgTest_dir_1.ExampleDirectiveFactory(), "pgTest");
     var ExampleExtension = /** @class */ (function () {
         function ExampleExtension(model) {
-            console.log("constructor of ExampleExtension");
             this.model = model;
         }
         ExampleExtension.prototype.isEditMode = function () {
@@ -39,7 +38,6 @@
         initialProperties: initProps_1.default,
         template: template,
         controller: ["$scope", function (scope) {
-                console.log("run controller of Extension");
                 scope.vm = new ExampleExtension(daVinci_1.utils.getEnigma(scope));
             }]
     };
