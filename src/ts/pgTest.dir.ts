@@ -138,6 +138,10 @@ class CommentTblCntrl implements ng.IController {
         // set Dimension Information
         if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
           this._dimensionsInfo = hyperCube.qDimensionInfo;
+
+          console.log(this._dimensionsInfo);
+
+          
         } else {
           this._dimensionsInfo = [];
         }
@@ -274,10 +278,7 @@ class CommentTblCntrl implements ng.IController {
    
    // that.scope.$emit('saveProperties') )
 
-
     this._propertiesPanel = that._model.layout.custom
-
-
 
 
     // GLOBAL OBJECT

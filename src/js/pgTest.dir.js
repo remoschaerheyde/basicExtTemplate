@@ -182,6 +182,7 @@
                 // set Dimension Information
                 if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
                     this._dimensionsInfo = hyperCube.qDimensionInfo;
+                    console.log(this._dimensionsInfo);
                 }
                 else {
                     this._dimensionsInfo = [];
