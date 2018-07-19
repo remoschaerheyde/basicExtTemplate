@@ -25,6 +25,7 @@ class CommentTblCntrl implements ng.IController {
   private tblBodyHeight: number;
   private tblFooterHeight: number;
   private commentColWidth:number;
+  private _tblCols: {headerTitle: string, type:string, colWidth: number}[]
 
   public get dimensionsInfo(): any {
     return this._dimensionsInfo;
@@ -135,23 +136,38 @@ class CommentTblCntrl implements ng.IController {
         } else {
         this._matrixData = [];
         }
-        // set Dimension Information
+
+
+        this._tblCols = [];
+        // set Header Dimension Titles ===============================================================
         if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
           this._dimensionsInfo = hyperCube.qDimensionInfo;
 
           console.log(this._dimensionsInfo);
+          hyperCube.qDimensionInfo.forEach(dimInfo => {
+            this._tblCols.push({headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200})
 
-          
+          })
         } else {
           this._dimensionsInfo = [];
         }
-        // set Measure Information
+        // set Header Measure Titles ====================================================================
         if (hyperCube.qMeasureInfo && (hyperCube.qMeasureInfo as any).length > 0) {
           this._measureInfo = hyperCube.qMeasureInfo;
           this.maxY = hyperCube.qMeasureInfo[0].qMax;
+
+          (hyperCube.qMeasureInfo as any).forEach(measureInfo => {
+            this._tblCols.push({headerTitle: measureInfo.qFallbackTitle, type: 'M', colWidth: 200})
+          })
+
         } else {
           this.maxY = 0;
         }
+        // set Header Comment Titles =======================================================================
+
+        this._tblCols.push({headerTitle: 'Comments', type: 'comment', colWidth: 400})
+        
+
     } catch(err) {
       console.log('could not set data', err);
     }
@@ -264,22 +280,51 @@ class CommentTblCntrl implements ng.IController {
     }
     
     private _propertiesPanel: object;
-
-
+    private headerWidth: number;
 
   // ============================== injector / Constructor ======================================================
-  static $inject = ["$timeout", "$element", "$scope", "$http"];
+  static $inject = ["$timeout", "$element", "$scope", "$http", "$window"];
 
-  constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider) {
+  constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider, private window:ng.IWindowService) {
     const that: any = this;
 
+    
+    // horizontal Scrollbar ================================================
+    let childElements = this.element.children()
+
+    console.log(childElements);
+
+    let header:any = this.element.children()[0]
+    let headerTableContainer = header.children[0]
+    let body:any = this.element.children()[1]
+
+    that.headerWidth = body.clientWidth
+
+    body.onscroll = function(e) {
+      let bodyScrollPosition = (e.target as any).scrollLeft;
+      that.headerWidth = body.clientWidth
+      headerTableContainer.scrollTo(bodyScrollPosition,0)
+      that.scope.$apply();
+    }
+
+    window.onresize = function (e) {
+      e.preventDefault()
+     // headerTableContainer.style.width = body.clientWidth
+      that.headerWidth = body.clientWidth
+      that.scope.$apply()
+    }
+
+    window.onload = function () {
+      //headerTableContainer.style.width = body.clientWidth
+      that.headerWidth = body.clientWidth
+      that.scope.$apply()
+
+    }
    
-    console.log(this);
-   
-   // that.scope.$emit('saveProperties') )
+    // ======================================================================
+
 
     this._propertiesPanel = that._model.layout.custom
-
 
     // GLOBAL OBJECT
     this.globalObj = that._model.session.app.global;
@@ -298,8 +343,6 @@ class CommentTblCntrl implements ng.IController {
         that.commentEditMode = newValue;
     })
   
- 
-
 
 
     scope.$on("$destroy", function() {

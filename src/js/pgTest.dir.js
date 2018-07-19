@@ -14,11 +14,12 @@
     require("./customInterfaces");
     var commentClass_1 = require("./commentClass");
     var CommentTblCntrl = /** @class */ (function () {
-        function CommentTblCntrl(timeout, element, scope, http) {
+        function CommentTblCntrl(timeout, element, scope, http, window) {
             var _this = this;
             this.element = element;
             this.scope = scope;
             this.http = http;
+            this.window = window;
             this.stringSeperator = '|';
             this.apiCommentRoute = 'http://localhost:5000/api/comments/';
             // ================== Set the data of the session object ================================//
@@ -68,8 +69,31 @@
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not delete comment', err); });
             };
             var that = this;
-            console.log(this);
-            // that.scope.$emit('saveProperties') )
+            // horizontal Scrollbar ================================================
+            var childElements = this.element.children();
+            console.log(childElements);
+            var header = this.element.children()[0];
+            var headerTableContainer = header.children[0];
+            var body = this.element.children()[1];
+            that.headerWidth = body.clientWidth;
+            body.onscroll = function (e) {
+                var bodyScrollPosition = e.target.scrollLeft;
+                that.headerWidth = body.clientWidth;
+                headerTableContainer.scrollTo(bodyScrollPosition, 0);
+                that.scope.$apply();
+            };
+            window.onresize = function (e) {
+                e.preventDefault();
+                // headerTableContainer.style.width = body.clientWidth
+                that.headerWidth = body.clientWidth;
+                that.scope.$apply();
+            };
+            window.onload = function () {
+                //headerTableContainer.style.width = body.clientWidth
+                that.headerWidth = body.clientWidth;
+                that.scope.$apply();
+            };
+            // ======================================================================
             this._propertiesPanel = that._model.layout.custom;
             // GLOBAL OBJECT
             this.globalObj = that._model.session.app.global;
@@ -179,22 +203,31 @@
                 else {
                     this._matrixData = [];
                 }
-                // set Dimension Information
+                this._tblCols = [];
+                // set Header Dimension Titles ===============================================================
                 if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
                     this._dimensionsInfo = hyperCube.qDimensionInfo;
                     console.log(this._dimensionsInfo);
+                    hyperCube.qDimensionInfo.forEach(function (dimInfo) {
+                        _this._tblCols.push({ headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200 });
+                    });
                 }
                 else {
                     this._dimensionsInfo = [];
                 }
-                // set Measure Information
+                // set Header Measure Titles ====================================================================
                 if (hyperCube.qMeasureInfo && hyperCube.qMeasureInfo.length > 0) {
                     this._measureInfo = hyperCube.qMeasureInfo;
                     this.maxY = hyperCube.qMeasureInfo[0].qMax;
+                    hyperCube.qMeasureInfo.forEach(function (measureInfo) {
+                        _this._tblCols.push({ headerTitle: measureInfo.qFallbackTitle, type: 'M', colWidth: 200 });
+                    });
                 }
                 else {
                     this.maxY = 0;
                 }
+                // set Header Comment Titles =======================================================================
+                this._tblCols.push({ headerTitle: 'Comments', type: 'comment', colWidth: 400 });
             }
             catch (err) {
                 console.log('could not set data', err);
@@ -271,7 +304,7 @@
             this.textAreaComment = "";
         };
         // ============================== injector / Constructor ======================================================
-        CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http"];
+        CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http", "$window"];
         return CommentTblCntrl;
     }());
     function ExampleDirectiveFactory() {

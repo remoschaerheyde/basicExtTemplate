@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "qvangular", "qlik", "text!../templates/extension.html", "./pgTest.dir", "../../node_modules/davinci.js/dist/umd/daVinci", "./ngRegister", "./definition", "./initProps"], factory);
+        define(["require", "exports", "qvangular", "qlik", "text!../templates/extension.html", "./pgTest.dir", "./test.dir", "../../node_modules/davinci.js/dist/umd/daVinci", "./ngRegister", "./definition", "./initProps"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,12 +13,15 @@
     var qlik = require("qlik");
     var template = require("text!../templates/extension.html");
     var pgTest_dir_1 = require("./pgTest.dir");
+    var test_dir_1 = require("./test.dir");
     var daVinci_1 = require("../../node_modules/davinci.js/dist/umd/daVinci");
     var ngRegister_1 = require("./ngRegister");
     var definition_1 = require("./definition");
     var initProps_1 = require("./initProps");
     qvangular.service("$registrationProvider", daVinci_1.services.RegistrationProvider).implementObject(qvangular);
+    console.log(qvangular);
     ngRegister_1.registerDirective(qvangular, pgTest_dir_1.ExampleDirectiveFactory(), "pgTest");
+    ngRegister_1.registerDirective(qvangular, test_dir_1.ExampleDirectiveFactory2(), "test");
     var ExampleExtension = /** @class */ (function () {
         function ExampleExtension(model) {
             this.model = model;
@@ -39,6 +42,7 @@
         template: template,
         controller: ["$scope", function (scope) {
                 scope.vm = new ExampleExtension(daVinci_1.utils.getEnigma(scope));
+                scope.vm2 = new ExampleExtension(daVinci_1.utils.getEnigma(scope));
             }]
     };
 });
