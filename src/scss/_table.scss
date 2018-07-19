@@ -11,13 +11,11 @@
     table-layout: fixed;
 }
 
-  // table ==========================
+// table ==========================
 .hy-table-container {
     display: block;
 }
 
-
-  
 .hy-table-container--body {
     overflow: auto;
     height: 90%;
@@ -26,17 +24,13 @@
 .hy-header-item__container,
 .hy-cell,
 .hy-cell__container {
-   width: 200px;
     text-align: left;
-    
 }
 
 // HEADER BLOCK =================================================================
 
 .hy-header-container {
     background: $hdrFooterColor;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
     width: 100%;
 }
 
@@ -44,22 +38,18 @@
     overflow: hidden;
 }
 
-
 .hy-header {
     display: inline-block;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
     vertical-align: bottom;
 }
-
-
-
 
 .hy-header-item__container {
     text-align: left;
     position: relative;
     height: 100%;
     padding-right: 1px;
+    background: $hdrFooterColor;
+
 }
 
 .hy-header-item__content-container {
@@ -69,6 +59,8 @@
 
 .hy-header-item__content-container--title {
     overflow: hidden; 
+    height: 100%;
+    white-space: nowrap;
 }
 
 .hy-header-item__content-container--resize-box {
@@ -78,6 +70,7 @@
     top: 0px;
     right: 0px;
     border-right: 1px solid #fff;
+    height: 100%;
 }
 
 

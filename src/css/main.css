@@ -17,13 +17,10 @@
 .hy-header-item__container,
 .hy-cell,
 .hy-cell__container {
-  width: 200px;
   text-align: left; }
 
 .hy-header-container {
   background: #58585A;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
   width: 100%; }
 
 .hy-table-container--header {
@@ -31,22 +28,23 @@
 
 .hy-header {
   display: inline-block;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
   vertical-align: bottom; }
 
 .hy-header-item__container {
   text-align: left;
   position: relative;
   height: 100%;
-  padding-right: 1px; }
+  padding-right: 1px;
+  background: #58585A; }
 
 .hy-header-item__content-container {
   display: inline-block;
   height: 100%; }
 
 .hy-header-item__content-container--title {
-  overflow: hidden; }
+  overflow: hidden;
+  height: 100%;
+  white-space: nowrap; }
 
 .hy-header-item__content-container--resize-box {
   width: 5px;
@@ -54,7 +52,8 @@
   position: absolute;
   top: 0px;
   right: 0px;
-  border-right: 1px solid #fff; }
+  border-right: 1px solid #fff;
+  height: 100%; }
 
 .hy-header-item__text {
   color: #fff;
@@ -66,6 +65,54 @@
 
 .hy-cell__container {
   height: 100%; }
+
+.hy-comment__h-empty-div {
+  visibility: hidden; }
+
+.hy-comment__view--small {
+  background: #fff;
+  word-wrap: normal;
+  border-radius: 0px; }
+
+.hy-comment__view--small:hover {
+  background: #8B8B8D;
+  color: #fff; }
+
+.hy-comment__view--large-preview {
+  box-shadow: none;
+  border: none; }
+  .hy-comment__view--large-preview .hy-comment__close-btn--edit {
+    float: right; }
+  .hy-comment__view--large-preview .hy-comment__close-btn--edit:hover {
+    color: #8B8B8D; }
+  .hy-comment__view--large-preview .hy-comment__edit-body {
+    padding: 0px;
+    margin: 0px; }
+    .hy-comment__view--large-preview .hy-comment__edit-body .hy-comment__textarea {
+      height: 100px;
+      resize: none;
+      width: 100%;
+      border-radius: 0px;
+      border: none; }
+      .hy-comment__view--large-preview .hy-comment__edit-body .hy-comment__textarea :focus {
+        outline: none;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none; }
+  .hy-comment__view--large-preview .hy-comment__edit-header {
+    background: #fef0e2;
+    border-radius: 0px; }
+  .hy-comment__view--large-preview .hy-comment__edit-footer {
+    background: #fef0e2;
+    border-radius: 0px; }
+
+.hy-comment__close-btn-container {
+  display: block;
+  position: absolute;
+  right: 1px;
+  top: 5px; }
+  .hy-comment__close-btn-container :hover {
+    color: #8B8B8D; }
 
 .commentEditMode {
   background-color: #fffaf5 !important; }

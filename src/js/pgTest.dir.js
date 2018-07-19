@@ -207,7 +207,6 @@
                 // set Header Dimension Titles ===============================================================
                 if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
                     this._dimensionsInfo = hyperCube.qDimensionInfo;
-                    console.log(this._dimensionsInfo);
                     hyperCube.qDimensionInfo.forEach(function (dimInfo) {
                         _this._tblCols.push({ headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200 });
                     });
@@ -302,6 +301,21 @@
             this.calcCommentColWidth(this.element.width());
             this.showEditForCell = -1;
             this.textAreaComment = "";
+        };
+        CommentTblCntrl.prototype.resizeStart = function (event, index) {
+            // mousedown event
+            this.resizeColumn = { width: this._tblCols[index].colWidth, index: index, cursorStartPosition: event.clientX };
+        };
+        CommentTblCntrl.prototype.resizeEnd = function (event) {
+            if (this.resizeColumn) {
+                var resizeEnd = event.clientX;
+                var headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width);
+                var newWidth = resizeEnd - headerElementStartPosition;
+                if (newWidth >= 20) {
+                    this._tblCols[this.resizeColumn.index].colWidth = newWidth;
+                    this.resizeColumn = undefined;
+                }
+            }
         };
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http", "$window"];

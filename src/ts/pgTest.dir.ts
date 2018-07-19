@@ -143,7 +143,6 @@ class CommentTblCntrl implements ng.IController {
         if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
           this._dimensionsInfo = hyperCube.qDimensionInfo;
 
-          console.log(this._dimensionsInfo);
           hyperCube.qDimensionInfo.forEach(dimInfo => {
             this._tblCols.push({headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200})
 
@@ -281,6 +280,32 @@ class CommentTblCntrl implements ng.IController {
     
     private _propertiesPanel: object;
     private headerWidth: number;
+
+
+
+    // colum Resize Settings
+    private resizeColumn:{width:number, index: number, cursorStartPosition: number};
+
+    private resizeStart(event, index) {
+      // mousedown event
+      this.resizeColumn = {width: this._tblCols[index].colWidth, index: index, cursorStartPosition: event.clientX}
+    }
+
+    private resizeEnd(event) {
+      if(this.resizeColumn) {
+        let resizeEnd = event.clientX
+
+        let headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width)
+        let newWidth = resizeEnd - headerElementStartPosition
+  
+        if(newWidth >= 20) {
+          this._tblCols[this.resizeColumn.index].colWidth = newWidth
+          this.resizeColumn = undefined;
+        }
+      }
+    }
+
+
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http", "$window"];
