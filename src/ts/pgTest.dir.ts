@@ -4,7 +4,6 @@ import "./customInterfaces"
 import {Comment} from './commentClass';
 
 
-
 class CommentTblCntrl implements ng.IController {
 
   private _model: EngineAPI.IGenericObject;
@@ -137,19 +136,14 @@ class CommentTblCntrl implements ng.IController {
         this._matrixData = [];
         }
 
-
-
-
         let tblCols = [];
 
         // ADD DIMENSION INFO TO SCOPE ===============================================================
         if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
           this._dimensionsInfo = hyperCube.qDimensionInfo;
 
-
-
           hyperCube.qDimensionInfo.forEach(dimInfo => {
-            console.log(dimInfo);
+        
             tblCols.push({cId: (dimInfo as any).cId, headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200})
 
           })
@@ -160,7 +154,6 @@ class CommentTblCntrl implements ng.IController {
         if (hyperCube.qMeasureInfo && (hyperCube.qMeasureInfo as any).length > 0) {
           this._measureInfo = hyperCube.qMeasureInfo;
 
-          console.log(hyperCube.qMeasureInfo[0].cId);
           this.maxY = hyperCube.qMeasureInfo[0].qMax;
 
           (hyperCube.qMeasureInfo as any).forEach(measureInfo => {
@@ -171,9 +164,7 @@ class CommentTblCntrl implements ng.IController {
           this.maxY = 0;
         }
         // set Header Comment Titles =======================================================================
-
         tblCols.push({cId: 'comment', headerTitle: 'Comments', type: 'comment', colWidth: 400})
-
 
         this._model.app.getObject(this._model.id).then(genObj => {
           genObj.getProperties().then(genObjProps => {
@@ -186,10 +177,8 @@ class CommentTblCntrl implements ng.IController {
             } else {
               this._tblCols = tblCols
             }
-          })
-        })
-        
-
+          }).catch(err => console.log('could not get gen obj props', err))
+        }).catch(err => console.log('could not get obj', err))
     } catch(err) {
       console.log('could not set data', err);
     }
@@ -320,32 +309,33 @@ class CommentTblCntrl implements ng.IController {
 
         let headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width);
         let newWidth = resizeEnd - headerElementStartPosition;
-  
         let minColWidth = 20;
 
         if(newWidth >= minColWidth) {
           this._tblCols[this.resizeColumn.index].colWidth = newWidth;
 
-          this._model.app.getObject(this._model.id).then(extObj =>{
-
-            extObj.getProperties().then(extProps => {
-              console.log(extProps);
-              let newExtProps = extProps
-              newExtProps.hyTblCols = this._tblCols;
-              extObj.setProperties(newExtProps)
-              .then(() => {
-                extObj.getLayout()
-              })
-            })
-
-          })
-
-         
-
-
           this.resizeColumn = undefined;
         }
       }
+    }
+
+    private saveProperties() {
+      console.log('saving extension properties');
+      this._model.app.getObject(this._model.id).then(extObj =>{
+
+        extObj.getProperties().then(extProps => {
+          let newProperties = extProps
+
+          // ADD PROPERTIES HERE ============>>
+
+          newProperties.hyTblCols = this._tblCols;
+
+          newProperties.testProp = 'sav2';
+          extObj.setProperties(newProperties)
+          .then(() => extObj.getLayout())
+        })
+      })
+
     }
 
 
@@ -358,9 +348,7 @@ class CommentTblCntrl implements ng.IController {
 
     
     // horizontal Scrollbar ================================================
-    let childElements = this.element.children()
-
-
+    
 
     let header:any = this.element.children()[0]
     let headerTableContainer = header.children[0]
@@ -412,9 +400,36 @@ class CommentTblCntrl implements ng.IController {
     })
   
 
+    // save scope variables ==================================================
 
+
+
+    // DEV ===================================================
+    that._model.app.getObject(that._model.id).then(extObj =>{
+
+      extObj.getProperties().then(extProps => {
+        console.log('extprops');
+          console.log(extProps);
+
+      })
+    })
+    // END DEV ===================================================
+
+    
+
+    
+    // saving properties
+    window.onbeforeunload = function functionName() {
+      console.log('beforeunload');
+      that.saveProperties();
+
+    }
+    
     scope.$on("$destroy", function() {
       console.log('destroyed');
+      
+      that.saveProperties();
+      
       that.destroySessionObject();
     });
   }

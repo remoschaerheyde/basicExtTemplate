@@ -70,7 +70,6 @@
             };
             var that = this;
             // horizontal Scrollbar ================================================
-            var childElements = this.element.children();
             var header = this.element.children()[0];
             var headerTableContainer = header.children[0];
             var body = this.element.children()[1];
@@ -106,8 +105,23 @@
             that.scope.$watch("vm._propertiesPanel.commentEditMode", function (newValue) {
                 that.commentEditMode = newValue;
             });
+            // save scope variables ==================================================
+            // DEV ===================================================
+            that._model.app.getObject(that._model.id).then(function (extObj) {
+                extObj.getProperties().then(function (extProps) {
+                    console.log('extprops');
+                    console.log(extProps);
+                });
+            });
+            // END DEV ===================================================
+            // saving properties
+            window.onbeforeunload = function functionName() {
+                console.log('beforeunload');
+                that.saveProperties();
+            };
             scope.$on("$destroy", function () {
                 console.log('destroyed');
+                that.saveProperties();
                 that.destroySessionObject();
             });
         }
@@ -207,7 +221,6 @@
                 if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
                     this._dimensionsInfo = hyperCube.qDimensionInfo;
                     hyperCube.qDimensionInfo.forEach(function (dimInfo) {
-                        console.log(dimInfo);
                         tblCols_1.push({ cId: dimInfo.cId, headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200 });
                     });
                 }
@@ -217,7 +230,6 @@
                 // ADD HEADER INFO TO SCOPE ====================================================================
                 if (hyperCube.qMeasureInfo && hyperCube.qMeasureInfo.length > 0) {
                     this._measureInfo = hyperCube.qMeasureInfo;
-                    console.log(hyperCube.qMeasureInfo[0].cId);
                     this.maxY = hyperCube.qMeasureInfo[0].qMax;
                     hyperCube.qMeasureInfo.forEach(function (measureInfo) {
                         tblCols_1.push({ cId: measureInfo.cId, headerTitle: measureInfo.qFallbackTitle, type: 'M', colWidth: 200 });
@@ -238,8 +250,8 @@
                         else {
                             _this._tblCols = tblCols_1;
                         }
-                    });
-                });
+                    }).catch(function (err) { return console.log('could not get gen obj props', err); });
+                }).catch(function (err) { return console.log('could not get obj', err); });
             }
             catch (err) {
                 console.log('could not set data', err);
@@ -320,7 +332,6 @@
             this.resizeColumn = { width: this._tblCols[index].colWidth, index: index, cursorStartPosition: event.clientX };
         };
         CommentTblCntrl.prototype.resizeEnd = function (event) {
-            var _this = this;
             if (this.resizeColumn) {
                 var resizeEnd = event.clientX;
                 var headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width);
@@ -328,20 +339,23 @@
                 var minColWidth = 20;
                 if (newWidth >= minColWidth) {
                     this._tblCols[this.resizeColumn.index].colWidth = newWidth;
-                    this._model.app.getObject(this._model.id).then(function (extObj) {
-                        extObj.getProperties().then(function (extProps) {
-                            console.log(extProps);
-                            var newExtProps = extProps;
-                            newExtProps.hyTblCols = _this._tblCols;
-                            extObj.setProperties(newExtProps)
-                                .then(function () {
-                                extObj.getLayout();
-                            });
-                        });
-                    });
                     this.resizeColumn = undefined;
                 }
             }
+        };
+        CommentTblCntrl.prototype.saveProperties = function () {
+            var _this = this;
+            console.log('saving extension properties');
+            this._model.app.getObject(this._model.id).then(function (extObj) {
+                extObj.getProperties().then(function (extProps) {
+                    var newProperties = extProps;
+                    // ADD PROPERTIES HERE ============>>
+                    newProperties.hyTblCols = _this._tblCols;
+                    newProperties.testProp = 'sav2';
+                    extObj.setProperties(newProperties)
+                        .then(function () { return extObj.getLayout(); });
+                });
+            });
         };
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http", "$window"];
