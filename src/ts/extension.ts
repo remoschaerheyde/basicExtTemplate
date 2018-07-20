@@ -12,8 +12,6 @@ import initProps from "./initProps";
 
 qvangular.service<services.IRegistrationProvider>("$registrationProvider", services.RegistrationProvider).implementObject(qvangular);
 
-
-console.log(qvangular);
 registerDirective(qvangular, ExampleDirectiveFactory(), "pgTest")
 registerDirective(qvangular, ExampleDirectiveFactory2(), "test")
 

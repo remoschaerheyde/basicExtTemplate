@@ -2,7 +2,7 @@
 
 .hy-directive-container {
     height: 100%;
-    width: 100%; 
+    width: 100%;
 }
 
 .hy-table {
@@ -11,14 +11,15 @@
     table-layout: fixed;
 }
 
-// table ==========================
+// Table ======================================================================
+
 .hy-table-container {
     display: block;
 }
 
 .hy-table-container--body {
     overflow: auto;
-    height: 90%;
+    height: 95%;
 }
 
 .hy-header-item__container,
@@ -29,13 +30,15 @@
 
 // HEADER BLOCK =================================================================
 
-.hy-header-container {
-    background: $hdrFooterColor;
-    width: 100%;
-}
 
 .hy-table-container--header {
     overflow: hidden;
+    height: 5%;
+}
+
+.hy-header-container {
+    background: $hdrFooterColor;
+    width: 100%;
 }
 
 .hy-header {
@@ -82,11 +85,15 @@
 // BODY BLOCK ===================================================================
 
 
+
 .hy-cell {
     border-right: 1px solid black;
     border-bottom: 1px solid $tblBodyBorderColor;
-
+    //background: #ECF0F2;
 }
+
+
+
 
 .hy-cell__container {
     height: 100%;

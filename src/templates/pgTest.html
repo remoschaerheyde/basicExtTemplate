@@ -17,9 +17,10 @@
             </table>
         </div>
     </div>
+
     <div class="hy-table-container hy-table-container--body">
-    <table class="hy-table">
-        <tbody>
+    <table class="hy-table hy-table--body">
+        <tbody class="hy-body">
             <tr ng-repeat="row in vm._matrixData track by $index" ng-init="outerRowIndex = $index">
                 <td class="hy-cell" ng-repeat="cell in row track by $index" ng-style="{'width': vm._tblCols[$index].colWidth + 'px'}" >
                     <!-- display row and measures -->

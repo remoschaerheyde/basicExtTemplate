@@ -71,7 +71,6 @@
             var that = this;
             // horizontal Scrollbar ================================================
             var childElements = this.element.children();
-            console.log(childElements);
             var header = this.element.children()[0];
             var headerTableContainer = header.children[0];
             var body = this.element.children()[1];
@@ -203,30 +202,44 @@
                 else {
                     this._matrixData = [];
                 }
-                this._tblCols = [];
-                // set Header Dimension Titles ===============================================================
+                var tblCols_1 = [];
+                // ADD DIMENSION INFO TO SCOPE ===============================================================
                 if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
                     this._dimensionsInfo = hyperCube.qDimensionInfo;
                     hyperCube.qDimensionInfo.forEach(function (dimInfo) {
-                        _this._tblCols.push({ headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200 });
+                        console.log(dimInfo);
+                        tblCols_1.push({ cId: dimInfo.cId, headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200 });
                     });
                 }
                 else {
                     this._dimensionsInfo = [];
                 }
-                // set Header Measure Titles ====================================================================
+                // ADD HEADER INFO TO SCOPE ====================================================================
                 if (hyperCube.qMeasureInfo && hyperCube.qMeasureInfo.length > 0) {
                     this._measureInfo = hyperCube.qMeasureInfo;
+                    console.log(hyperCube.qMeasureInfo[0].cId);
                     this.maxY = hyperCube.qMeasureInfo[0].qMax;
                     hyperCube.qMeasureInfo.forEach(function (measureInfo) {
-                        _this._tblCols.push({ headerTitle: measureInfo.qFallbackTitle, type: 'M', colWidth: 200 });
+                        tblCols_1.push({ cId: measureInfo.cId, headerTitle: measureInfo.qFallbackTitle, type: 'M', colWidth: 200 });
                     });
                 }
                 else {
                     this.maxY = 0;
                 }
                 // set Header Comment Titles =======================================================================
-                this._tblCols.push({ headerTitle: 'Comments', type: 'comment', colWidth: 400 });
+                tblCols_1.push({ cId: 'comment', headerTitle: 'Comments', type: 'comment', colWidth: 400 });
+                this._model.app.getObject(this._model.id).then(function (genObj) {
+                    genObj.getProperties().then(function (genObjProps) {
+                        var savedIds = genObjProps.hyTblCols.map(function (col) { return col.cId; }).toString();
+                        var cubeIds = tblCols_1.map(function (col) { return col.cId; }).toString();
+                        if (savedIds === cubeIds) {
+                            _this._tblCols = genObjProps.hyTblCols;
+                        }
+                        else {
+                            _this._tblCols = tblCols_1;
+                        }
+                    });
+                });
             }
             catch (err) {
                 console.log('could not set data', err);
@@ -307,12 +320,25 @@
             this.resizeColumn = { width: this._tblCols[index].colWidth, index: index, cursorStartPosition: event.clientX };
         };
         CommentTblCntrl.prototype.resizeEnd = function (event) {
+            var _this = this;
             if (this.resizeColumn) {
                 var resizeEnd = event.clientX;
                 var headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width);
                 var newWidth = resizeEnd - headerElementStartPosition;
-                if (newWidth >= 20) {
+                var minColWidth = 20;
+                if (newWidth >= minColWidth) {
                     this._tblCols[this.resizeColumn.index].colWidth = newWidth;
+                    this._model.app.getObject(this._model.id).then(function (extObj) {
+                        extObj.getProperties().then(function (extProps) {
+                            console.log(extProps);
+                            var newExtProps = extProps;
+                            newExtProps.hyTblCols = _this._tblCols;
+                            extObj.setProperties(newExtProps)
+                                .then(function () {
+                                extObj.getLayout();
+                            });
+                        });
+                    });
                     this.resizeColumn = undefined;
                 }
             }

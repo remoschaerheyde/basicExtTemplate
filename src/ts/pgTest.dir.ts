@@ -25,7 +25,7 @@ class CommentTblCntrl implements ng.IController {
   private tblBodyHeight: number;
   private tblFooterHeight: number;
   private commentColWidth:number;
-  private _tblCols: {headerTitle: string, type:string, colWidth: number}[]
+  private _tblCols: {cId: string, headerTitle: string, type:string, colWidth: number}[]
 
   public get dimensionsInfo(): any {
     return this._dimensionsInfo;
@@ -138,25 +138,33 @@ class CommentTblCntrl implements ng.IController {
         }
 
 
-        this._tblCols = [];
-        // set Header Dimension Titles ===============================================================
+
+
+        let tblCols = [];
+
+        // ADD DIMENSION INFO TO SCOPE ===============================================================
         if (hyperCube.qDimensionInfo && hyperCube.qDimensionInfo.length > 0) {
           this._dimensionsInfo = hyperCube.qDimensionInfo;
 
+
+
           hyperCube.qDimensionInfo.forEach(dimInfo => {
-            this._tblCols.push({headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200})
+            console.log(dimInfo);
+            tblCols.push({cId: (dimInfo as any).cId, headerTitle: dimInfo.qGroupFallbackTitles[0], type: 'D', colWidth: 200})
 
           })
         } else {
           this._dimensionsInfo = [];
         }
-        // set Header Measure Titles ====================================================================
+        // ADD HEADER INFO TO SCOPE ====================================================================
         if (hyperCube.qMeasureInfo && (hyperCube.qMeasureInfo as any).length > 0) {
           this._measureInfo = hyperCube.qMeasureInfo;
+
+          console.log(hyperCube.qMeasureInfo[0].cId);
           this.maxY = hyperCube.qMeasureInfo[0].qMax;
 
           (hyperCube.qMeasureInfo as any).forEach(measureInfo => {
-            this._tblCols.push({headerTitle: measureInfo.qFallbackTitle, type: 'M', colWidth: 200})
+            tblCols.push({cId: (measureInfo as any).cId, headerTitle: measureInfo.qFallbackTitle, type: 'M', colWidth: 200})
           })
 
         } else {
@@ -164,7 +172,22 @@ class CommentTblCntrl implements ng.IController {
         }
         // set Header Comment Titles =======================================================================
 
-        this._tblCols.push({headerTitle: 'Comments', type: 'comment', colWidth: 400})
+        tblCols.push({cId: 'comment', headerTitle: 'Comments', type: 'comment', colWidth: 400})
+
+
+        this._model.app.getObject(this._model.id).then(genObj => {
+          genObj.getProperties().then(genObjProps => {
+
+            let savedIds = genObjProps.hyTblCols.map(col => col.cId).toString()
+            let cubeIds = tblCols.map(col => col.cId).toString()
+
+            if(savedIds === cubeIds) {
+              this._tblCols = genObjProps.hyTblCols
+            } else {
+              this._tblCols = tblCols
+            }
+          })
+        })
         
 
     } catch(err) {
@@ -293,13 +316,33 @@ class CommentTblCntrl implements ng.IController {
 
     private resizeEnd(event) {
       if(this.resizeColumn) {
-        let resizeEnd = event.clientX
+        let resizeEnd = event.clientX;
 
-        let headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width)
-        let newWidth = resizeEnd - headerElementStartPosition
+        let headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width);
+        let newWidth = resizeEnd - headerElementStartPosition;
   
-        if(newWidth >= 20) {
-          this._tblCols[this.resizeColumn.index].colWidth = newWidth
+        let minColWidth = 20;
+
+        if(newWidth >= minColWidth) {
+          this._tblCols[this.resizeColumn.index].colWidth = newWidth;
+
+          this._model.app.getObject(this._model.id).then(extObj =>{
+
+            extObj.getProperties().then(extProps => {
+              console.log(extProps);
+              let newExtProps = extProps
+              newExtProps.hyTblCols = this._tblCols;
+              extObj.setProperties(newExtProps)
+              .then(() => {
+                extObj.getLayout()
+              })
+            })
+
+          })
+
+         
+
+
           this.resizeColumn = undefined;
         }
       }
@@ -317,7 +360,7 @@ class CommentTblCntrl implements ng.IController {
     // horizontal Scrollbar ================================================
     let childElements = this.element.children()
 
-    console.log(childElements);
+
 
     let header:any = this.element.children()[0]
     let headerTableContainer = header.children[0]

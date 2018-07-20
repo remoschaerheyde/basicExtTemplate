@@ -19,7 +19,6 @@
     var definition_1 = require("./definition");
     var initProps_1 = require("./initProps");
     qvangular.service("$registrationProvider", daVinci_1.services.RegistrationProvider).implementObject(qvangular);
-    console.log(qvangular);
     ngRegister_1.registerDirective(qvangular, pgTest_dir_1.ExampleDirectiveFactory(), "pgTest");
     ngRegister_1.registerDirective(qvangular, test_dir_1.ExampleDirectiveFactory2(), "test");
     var ExampleExtension = /** @class */ (function () {

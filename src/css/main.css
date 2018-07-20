@@ -12,19 +12,20 @@
 
 .hy-table-container--body {
   overflow: auto;
-  height: 90%; }
+  height: 95%; }
 
 .hy-header-item__container,
 .hy-cell,
 .hy-cell__container {
   text-align: left; }
 
+.hy-table-container--header {
+  overflow: hidden;
+  height: 5%; }
+
 .hy-header-container {
   background: #58585A;
   width: 100%; }
-
-.hy-table-container--header {
-  overflow: hidden; }
 
 .hy-header {
   display: inline-block;
