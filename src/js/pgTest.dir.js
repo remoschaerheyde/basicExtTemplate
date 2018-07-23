@@ -51,7 +51,7 @@
             this.addOrUpdateComment = function (row) {
                 //this.getAppSelections().then(selections => {
                 var _this = this;
-                var newComment = new commentClass_1.Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this.context, this._model.id);
+                var newComment = new commentClass_1.Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id);
                 this.http({
                     url: this.apiCommentRoute + "add_new_comment",
                     method: "POST",
@@ -107,9 +107,9 @@
             that.scope.$watch("vm._propertiesPanel.commentEditMode", function (newValue) {
                 that.commentEditMode = newValue;
             });
-            that.scope.$watch("vm.getContext()", function (newContext) {
-                _this.context = newContext;
-            }, true);
+            // that.scope.$watch("vm.getContext()", (newContext:SelectionContext) => {
+            //   this.context = newContext;
+            // }, true)
             // SAVE PROPERTIES ==========================================================================
             window.onbeforeunload = function functionName() {
                 console.log('beforeunload');
@@ -327,15 +327,6 @@
             this.calcCommentColWidth(this.element.width());
             this.showEditForCell = -1;
             this.textAreaComment = "";
-        };
-        CommentTblCntrl.prototype.getContext = function () {
-            return {
-                fieldOne: this._propertiesPanel.context.fieldOne,
-                fieldTwo: this._propertiesPanel.context.fieldTwo,
-                fieldThree: this._propertiesPanel.context.fieldThree,
-                fieldFour: this._propertiesPanel.context.fieldFour,
-                fieldFive: this._propertiesPanel.context.fieldFive,
-            };
         };
         CommentTblCntrl.prototype.resizeStart = function (event, index) {
             // mousedown event

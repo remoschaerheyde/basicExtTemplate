@@ -7,4 +7,4 @@ exports.poolConfig = {
     host: 'localhost'
 }
 
-exports.dbTable = 'testcomment2'
+exports.dbTable = 'testcomment3'

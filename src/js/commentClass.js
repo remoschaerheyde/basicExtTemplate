@@ -10,12 +10,13 @@
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Comment = /** @class */ (function () {
-        function Comment(dimKey, author, comment, dimensions, context, extensionId) {
+        function Comment(dimKey, author, comment, dimensions, 
+        //   private context: SelectionContext,
+        extensionId) {
             this.dimKey = dimKey;
             this.author = author;
             this.comment = comment;
             this.dimensions = dimensions;
-            this.context = context;
             this.extensionId = extensionId;
             this.dateTime = this.getDateTime();
             this.usedDimensions = this.createDimString();

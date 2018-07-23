@@ -1,0 +1,6 @@
+  dimkey character varying,
+  comment character varying,
+  last_author character varying,
+  last_update character varying,
+  extension_id character varying,
+  used_dimensions character varying,

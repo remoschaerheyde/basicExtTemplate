@@ -247,7 +247,7 @@ class CommentTblCntrl implements ng.IController {
 
     //this.getAppSelections().then(selections => {
 
-      let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this.context, this._model.id)
+      let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id)
 
       this.http({
         url: this.apiCommentRoute +  "add_new_comment",
@@ -306,18 +306,16 @@ class CommentTblCntrl implements ng.IController {
       this.textAreaComment = "";
     }
 
-    private getContext() {
-      return {
-        fieldOne: this._propertiesPanel.context.fieldOne,
-        fieldTwo: this._propertiesPanel.context.fieldTwo,
-        fieldThree: this._propertiesPanel.context.fieldThree,
-        fieldFour: this._propertiesPanel.context.fieldFour,
-        fieldFive: this._propertiesPanel.context.fieldFive,
-      }
-    }
+    // private getContext() {
+    //   return {
+    //     fieldOne: this._propertiesPanel.context.fieldOne,
+    //     fieldTwo: this._propertiesPanel.context.fieldTwo,
+    //     fieldThree: this._propertiesPanel.context.fieldThree,
+    //     fieldFour: this._propertiesPanel.context.fieldFour,
+    //     fieldFive: this._propertiesPanel.context.fieldFive,
+    //   }
+    // }
     
-
-
 
     // colum Resize Settings
     private resizeColumn:{width:number, index: number, cursorStartPosition: number};
@@ -453,9 +451,9 @@ class CommentTblCntrl implements ng.IController {
     })
   
     
-    that.scope.$watch("vm.getContext()", (newContext:SelectionContext) => {
-      this.context = newContext;
-    }, true)
+    // that.scope.$watch("vm.getContext()", (newContext:SelectionContext) => {
+    //   this.context = newContext;
+    // }, true)
     
 
 

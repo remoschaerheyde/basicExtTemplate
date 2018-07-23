@@ -51,33 +51,37 @@
     // *****************************************************************************
     // CONTEXT
     // *****************************************************************************
-    var contextText = {
+    /*
+    const contextText = {
         label: "Please select up to five fields which -in addition to the dimensions in your table-, should also be associated with your comments",
         component: "text"
     };
-    var ContextDropDown = /** @class */ (function () {
-        function ContextDropDown(label, ref) {
-            this.label = label;
-            this.ref = ref;
-            this.type = 'string';
-            this.component = 'dropdown';
-            this.defaultValue = 'None';
+    
+    
+    class ContextDropDown {
+    
+        private type:string = 'string';
+        private component: string = 'dropdown';
+        private defaultValue: string = 'None';
+    
+        public options(d) {
+            
+            return new Promise((resolve,reject) => {
+                app.getList('FieldList', (fieldlist) => {
+                    let dropDownFieldList =  fieldlist.qFieldList.qItems.map(field => {
+                        return {value:field.qName,label:field.qName}
+                    })
+                    dropDownFieldList.unshift({value:'None',label:'None'})
+                    resolve(dropDownFieldList)
+                })
+            })
+        }
+        constructor(private label:string, private ref: string) {
             this.ref = 'custom.context.' + ref;
         }
-        ContextDropDown.prototype.options = function (d) {
-            return new Promise(function (resolve, reject) {
-                app.getList('FieldList', function (fieldlist) {
-                    var dropDownFieldList = fieldlist.qFieldList.qItems.map(function (field) {
-                        return { value: field.qName, label: field.qName };
-                    });
-                    dropDownFieldList.unshift({ value: 'None', label: 'None' });
-                    resolve(dropDownFieldList);
-                });
-            });
-        };
-        return ContextDropDown;
-    }());
-    var context = {
+    }
+    
+    const context = {
         type: "items",
         label: 'Context',
         items: {
@@ -88,7 +92,9 @@
             contextDropDownFour: new ContextDropDown('Field Four', 'fieldFour'),
             contextDropDownFive: new ContextDropDown('Field Five', 'fieldFive'),
         }
-    };
+    }
+    
+    */
     // *****************************************************************************
     // APPEARANCE 
     // *****************************************************************************
@@ -183,7 +189,7 @@
             keyDimensions: keyDimensions,
             measures: measures,
             sorting: sorting,
-            context: context,
+            //   context: context,
             appearance: appearanceSection,
             extSettings: extSettings,
             about: about

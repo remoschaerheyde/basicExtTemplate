@@ -60,6 +60,7 @@ const keyDimensions = {
 // *****************************************************************************
 
 
+/*
 const contextText = {
     label: "Please select up to five fields which -in addition to the dimensions in your table-, should also be associated with your comments",
     component: "text"
@@ -102,7 +103,7 @@ const context = {
     }
 }
 
-
+*/
 
 
 // *****************************************************************************
@@ -227,7 +228,7 @@ const extDefinition = {
         keyDimensions: keyDimensions,
         measures: measures,
         sorting: sorting,
-        context: context,
+     //   context: context,
         appearance: appearanceSection,
         extSettings: extSettings,
         about: about
