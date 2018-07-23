@@ -9,6 +9,8 @@ router.post('/comments/get_all', (req,res) => {
     let pool = new pg.Pool(poolConfig)
 
     let commentsInQlikTable = JSON.parse(req.body.comments)
+
+    let extId = JSON.parse(req.body.extId)
     try {
     pool.connect((connErr,db) => {
         if(connErr) {
@@ -16,7 +18,7 @@ router.post('/comments/get_all', (req,res) => {
         } else {
             console.log('connected to pool')
             let commentsFound = [];
-                db.query(`SELECT dimkey,comment from ${dbTable}`, (queryErr, table) => {
+                db.query(`SELECT dimkey,comment from ${dbTable} WHERE extension_id = $1`,[extId] ,(queryErr, table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr)
                     } else {
@@ -47,16 +49,13 @@ router.post('/comments/add_new_comment', (req,res) => {
     let pool = new pg.Pool(poolConfig);
     let newComment = JSON.parse(req.body.newComment);
 
-    console.log('------------------------')
-    console.log(newComment)
-
     try {
     pool.connect((connErr,db,done) => {
         if(connErr) {
             return console.log(connErr)
         } else {
             console.log('connected to pool')
-                db.query(`SELECT * FROM ${dbTable} WHERE dimkey = $1`, [newComment.dimKey] ,(queryErr, table) => {
+                db.query(`SELECT * FROM ${dbTable} WHERE dimkey = $1 AND extension_id = $2`, [newComment.dimKey, newComment.extensionId] ,(queryErr, table) => {
                     if(queryErr) {
                         res.status(400).send(queryErr)
                     } else {
@@ -96,7 +95,11 @@ router.post('/comments/add_new_comment', (req,res) => {
 router.post('/comments/delete_comment', (req,res) => {
 
     let pool = new pg.Pool(poolConfig)
+
     let dimKey = JSON.parse(req.body.dimKey)
+    let extId = JSON.parse(req.body.extId)
+
+
 
     try {
     pool.connect((connErr,db,done) => {
@@ -106,12 +109,13 @@ router.post('/comments/delete_comment', (req,res) => {
             console.log('connected to pool')
          
                 // check if comment really exists in db
-                db.query(`SELECT * FROM ${dbTable} WHERE dimkey = $1`, [dimKey] ,(queryErr, table) => {
+                db.query(`SELECT * FROM ${dbTable} WHERE dimkey = $1 AND extension_id = $2`, [dimKey, extId] ,(queryErr, table) => {
+                    console.log(table)
                     if(queryErr) {
                         res.status(400).send(queryErr)
                     } else {
                         if(table.rows.length === 0) {
-                            console.log('no comments found, cannot delete a comment that does not exist')
+                            console.log(`no comments with "${dimKey}" found, cannot delete a comment that does not exist`)
                         } else {
                             console.log('comment found, deleting comment')
                             db.query(`DELETE FROM ${dbTable} WHERE dimkey = $1`,[dimKey],(queryErr, table) => {

@@ -99,10 +99,13 @@ class CommentTblCntrl implements ng.IController {
   // ================== Set the data of the session object ================================//
   private getDbComments = function(customHyperCubeLayout) {
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
+
+    let extId = this._model.id
+
     this.http({
       url: this.apiCommentRoute + "get_all",
       method: "POST",
-      data: { comments: JSON.stringify(comments) },
+      data: { comments: JSON.stringify(comments), extId: JSON.stringify(extId)},
       headers: { "Content-Type": "application/json" }
     }).then(res => {
         this._model.app.getObject(this._genericObjectId).then((sessionObj:EngineAPI.IGenericObjectProperties) => {
@@ -263,10 +266,12 @@ class CommentTblCntrl implements ng.IController {
 
   private deleteComment = function(row:EngineAPI.INxCellRows) { 
     let dimKey:string = this.createDimKey(row);
+    let extId = this._model.id
+
     this.http({
       url: this.apiCommentRoute + "delete_comment",
       method: "POST",
-      data: {dimKey: JSON.stringify(dimKey) },
+      data: {dimKey: JSON.stringify(dimKey), extId: JSON.stringify(extId)},
       headers: { "Content-Type": "application/json" }
     }).then(res => this._model.emit("changed")
     ).catch(err => console.log('could not delete comment',err))
@@ -280,7 +285,6 @@ class CommentTblCntrl implements ng.IController {
           width: this.element.width()
       };
     }
-
 
     private calcCommentColWidth(extWidth:number) {
   
@@ -365,12 +369,6 @@ class CommentTblCntrl implements ng.IController {
 
     */
    
-
-
-
-
-  
-
     private saveProperties() {
       console.log('saving extension properties');
       this._model.app.getObject(this._model.id).then(extObj =>{

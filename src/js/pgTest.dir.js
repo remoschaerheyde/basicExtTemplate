@@ -26,10 +26,11 @@
             this.getDbComments = function (customHyperCubeLayout) {
                 var _this = this;
                 var comments = customHyperCubeLayout.qHyperCube.hyRowKeys;
+                var extId = this._model.id;
                 this.http({
                     url: this.apiCommentRoute + "get_all",
                     method: "POST",
-                    data: { comments: JSON.stringify(comments) },
+                    data: { comments: JSON.stringify(comments), extId: JSON.stringify(extId) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) {
                     _this._model.app.getObject(_this._genericObjectId).then(function (sessionObj) {
@@ -63,10 +64,11 @@
             this.deleteComment = function (row) {
                 var _this = this;
                 var dimKey = this.createDimKey(row);
+                var extId = this._model.id;
                 this.http({
                     url: this.apiCommentRoute + "delete_comment",
                     method: "POST",
-                    data: { dimKey: JSON.stringify(dimKey) },
+                    data: { dimKey: JSON.stringify(dimKey), extId: JSON.stringify(extId) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not delete comment', err); });
             };
