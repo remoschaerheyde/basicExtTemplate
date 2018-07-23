@@ -49,14 +49,16 @@
             };
             // ================== API CALLS =======================================//
             this.addOrUpdateComment = function (row) {
+                //this.getAppSelections().then(selections => {
                 var _this = this;
-                var newComment = new commentClass_1.Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id);
+                var newComment = new commentClass_1.Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this.context, this._model.id);
                 this.http({
                     url: this.apiCommentRoute + "add_new_comment",
                     method: "POST",
                     data: { newComment: JSON.stringify(newComment) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not add new comment', err); });
+                //}).catch(err => console.log('could not get app selections', err))
             };
             this.deleteComment = function (row) {
                 var _this = this;
@@ -69,7 +71,10 @@
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not delete comment', err); });
             };
             var that = this;
-            // horizontal Scrollbar ================================================
+            // GET USER INFO ============================================= >>>>>>>>>>>
+            this.globalObj = that._model.session.app.global;
+            this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
+            // SCROLLBARS ================================================ >>>>>>>>>>>
             var header = this.element.children()[0];
             var headerTableContainer = header.children[0];
             var body = this.element.children()[1];
@@ -91,30 +96,21 @@
                 that.headerWidth = body.clientWidth;
                 that.scope.$apply();
             };
-            // ======================================================================
+            // WATCHERS ================================================ >>>>>>>>>>>
             this._propertiesPanel = that._model.layout.custom;
-            // GLOBAL OBJECT
-            this.globalObj = that._model.session.app.global;
-            // GET AUTHENTICATED USER
-            this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
-            // track changes of size
+            // ELEMENT SIZE
             that.scope.$watch("vm.getSize()", function (newValue) {
                 that.calcCommentColWidth(newValue.width);
                 that.calcTblHeight(newValue.height);
             }, true);
+            // EDIT MODE
             that.scope.$watch("vm._propertiesPanel.commentEditMode", function (newValue) {
                 that.commentEditMode = newValue;
             });
-            // save scope variables ==================================================
-            // DEV ===================================================
-            that._model.app.getObject(that._model.id).then(function (extObj) {
-                extObj.getProperties().then(function (extProps) {
-                    console.log('extprops');
-                    console.log(extProps);
-                });
-            });
-            // END DEV ===================================================
-            // saving properties
+            that.scope.$watch("vm.getContext()", function (newContext) {
+                _this.context = newContext;
+            }, true);
+            // SAVE PROPERTIES ==========================================================================
             window.onbeforeunload = function functionName() {
                 console.log('beforeunload');
                 that.saveProperties();
@@ -242,10 +238,15 @@
                 tblCols_1.push({ cId: 'comment', headerTitle: 'Comments', type: 'comment', colWidth: 400 });
                 this._model.app.getObject(this._model.id).then(function (genObj) {
                     genObj.getProperties().then(function (genObjProps) {
-                        var savedIds = genObjProps.hyTblCols.map(function (col) { return col.cId; }).toString();
-                        var cubeIds = tblCols_1.map(function (col) { return col.cId; }).toString();
-                        if (savedIds === cubeIds) {
-                            _this._tblCols = genObjProps.hyTblCols;
+                        if (genObjProps.hyTblCols) {
+                            var savedIds = genObjProps.hyTblCols.map(function (col) { return col.cId; }).toString();
+                            var cubeIds = tblCols_1.map(function (col) { return col.cId; }).toString();
+                            if (savedIds === cubeIds) {
+                                _this._tblCols = genObjProps.hyTblCols;
+                            }
+                            else {
+                                _this._tblCols = tblCols_1;
+                            }
                         }
                         else {
                             _this._tblCols = tblCols_1;
@@ -327,6 +328,15 @@
             this.showEditForCell = -1;
             this.textAreaComment = "";
         };
+        CommentTblCntrl.prototype.getContext = function () {
+            return {
+                fieldOne: this._propertiesPanel.context.fieldOne,
+                fieldTwo: this._propertiesPanel.context.fieldTwo,
+                fieldThree: this._propertiesPanel.context.fieldThree,
+                fieldFour: this._propertiesPanel.context.fieldFour,
+                fieldFive: this._propertiesPanel.context.fieldFive,
+            };
+        };
         CommentTblCntrl.prototype.resizeStart = function (event, index) {
             // mousedown event
             this.resizeColumn = { width: this._tblCols[index].colWidth, index: index, cursorStartPosition: event.clientX };
@@ -343,6 +353,28 @@
                 }
             }
         };
+        /*
+    
+        private getAppSelections() {
+          return new Promise((resolve,reject) => {
+    
+          let params = {
+                "qInfo": {
+                  "qId": "CurrentSelection",
+                  "qType": "CurrentSelection"
+                },
+                "qSelectionObjectDef": {}
+          }
+          this._model.app.createSessionObject(params).then(sessionObj => {
+            sessionObj.getLayout().then(sessionObjLayout => {
+              let appSelections = (sessionObjLayout as any).qSelectionObject.qSelections.map((selection => {return {field: selection.qField, value: selection.qSelected }}))
+              resolve(appSelections)
+            })
+          })
+          })
+        }
+    
+        */
         CommentTblCntrl.prototype.saveProperties = function () {
             var _this = this;
             console.log('saving extension properties');
@@ -351,7 +383,6 @@
                     var newProperties = extProps;
                     // ADD PROPERTIES HERE ============>>
                     newProperties.hyTblCols = _this._tblCols;
-                    newProperties.testProp = 'sav2';
                     extObj.setProperties(newProperties)
                         .then(function () { return extObj.getLayout(); });
                 });

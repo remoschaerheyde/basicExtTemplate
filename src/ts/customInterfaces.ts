@@ -1,20 +1,26 @@
 interface IQVAngular {
     $injector: angular.auto.IInjectorService;
-  }
+}
   
-  interface ElementSize {
-    height: number,
-    width: number
-  }
+interface ElementSize {
+  height: number,
+  width: number
+}
   
-  interface commentRow {
-    comment:string;
-    tableRowIndex: number;
-  }
-  
-  
-  interface customHyperCube extends EngineAPI.IHyperCube {
-    hyComments:[commentRow]
-  }
+interface commentRow {
+  comment:string;
+  tableRowIndex: number;
+}
   
   
+interface customHyperCube extends EngineAPI.IHyperCube {
+  hyComments:[commentRow]
+}
+  
+interface SelectionContext {
+  fieldOne: string;
+  fieldTwo: string;
+  fieldThree: string;
+  fieldFour: string;
+  fieldFive: string;
+}

@@ -4,7 +4,6 @@ import * as qlik from "qlik";
 import * as template from "text!../templates/extension.html";
 import { ExampleDirectiveFactory } from "./pgTest.dir";
 import { ExampleDirectiveFactory2 } from "./test.dir";
-
 import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import {registerDirective} from "./ngRegister";
 import extDefinition from "./definition";
@@ -14,7 +13,6 @@ qvangular.service<services.IRegistrationProvider>("$registrationProvider", servi
 
 registerDirective(qvangular, ExampleDirectiveFactory(), "pgTest")
 registerDirective(qvangular, ExampleDirectiveFactory2(), "test")
-
 
 
 class ExampleExtension {

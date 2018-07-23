@@ -1,17 +1,19 @@
-// *****************************************************************************
-// Dimensions
-// *****************************************************************************
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
         var v = factory(require, exports);
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports"], factory);
+        define(["require", "exports", "qlik"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    var qlik = require("qlik");
+    // *****************************************************************************
+    // Dimensions
+    // *****************************************************************************
+    var app = qlik.currApp();
     var dimText = {
         label: function (d) {
             return d.custom.hideDimKeyRegister.text;
@@ -24,7 +26,7 @@
     };
     var keyDimensions = {
         type: "items",
-        label: "Key Dimensions",
+        label: "Table Dimensions",
         items: {
             dimText: dimText,
             dimContainer: {
@@ -40,14 +42,55 @@
         }
     };
     // *****************************************************************************
-    // measures
+    // MEASURES
     // *****************************************************************************
     var measures = {
         uses: "measures",
         min: 0
     };
     // *****************************************************************************
-    // Appearance 
+    // CONTEXT
+    // *****************************************************************************
+    var contextText = {
+        label: "Please select up to five fields which -in addition to the dimensions in your table-, should also be associated with your comments",
+        component: "text"
+    };
+    var ContextDropDown = /** @class */ (function () {
+        function ContextDropDown(label, ref) {
+            this.label = label;
+            this.ref = ref;
+            this.type = 'string';
+            this.component = 'dropdown';
+            this.defaultValue = 'None';
+            this.ref = 'custom.context.' + ref;
+        }
+        ContextDropDown.prototype.options = function (d) {
+            return new Promise(function (resolve, reject) {
+                app.getList('FieldList', function (fieldlist) {
+                    var dropDownFieldList = fieldlist.qFieldList.qItems.map(function (field) {
+                        return { value: field.qName, label: field.qName };
+                    });
+                    dropDownFieldList.unshift({ value: 'None', label: 'None' });
+                    resolve(dropDownFieldList);
+                });
+            });
+        };
+        return ContextDropDown;
+    }());
+    var context = {
+        type: "items",
+        label: 'Context',
+        items: {
+            selectionText: contextText,
+            contextDropDownOne: new ContextDropDown('Field One', 'fieldOne'),
+            contextDropDownTwo: new ContextDropDown('Field Two', 'fieldTwo'),
+            contextDropDownThree: new ContextDropDown('Field Three', 'fieldThree'),
+            contextDropDownFour: new ContextDropDown('Field Four', 'fieldFour'),
+            contextDropDownFive: new ContextDropDown('Field Five', 'fieldFive'),
+        }
+    };
+    // *****************************************************************************
+    // APPEARANCE 
     // *****************************************************************************
     var modeSettingsSwitch = {
         type: "boolean",
@@ -140,6 +183,7 @@
             keyDimensions: keyDimensions,
             measures: measures,
             sorting: sorting,
+            context: context,
             appearance: appearanceSection,
             extSettings: extSettings,
             about: about

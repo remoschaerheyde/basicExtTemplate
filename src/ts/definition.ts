@@ -1,23 +1,29 @@
+import * as qlik from "qlik";
 
 // *****************************************************************************
 // Dimensions
 // *****************************************************************************
 
-    const dimText = {
+let app = qlik.currApp();
+
+
+
+
+const dimText = {
         label: function(d) {
             return  d.custom.hideDimKeyRegister.text
         },
 		component: "text"
     };
     
-    const customDimensions = {
+const customDimensions = {
         uses: "dimensions",
         min: 1
     }
       
-    const keyDimensions = {
+const keyDimensions = {
         type: "items",
-        label: "Key Dimensions",
+        label: "Table Dimensions",
         items: {
             dimText:dimText,
             dimContainer: {
@@ -40,7 +46,7 @@
 
  
 // *****************************************************************************
-// measures
+// MEASURES
 // *****************************************************************************
 
     const measures = {
@@ -48,8 +54,59 @@
         min: 0
     }
 
+ 
 // *****************************************************************************
-// Appearance 
+// CONTEXT
+// *****************************************************************************
+
+
+const contextText = {
+    label: "Please select up to five fields which -in addition to the dimensions in your table-, should also be associated with your comments",
+    component: "text"
+};
+
+
+class ContextDropDown {
+
+    private type:string = 'string';
+    private component: string = 'dropdown';
+    private defaultValue: string = 'None';
+
+    public options(d) {
+        
+        return new Promise((resolve,reject) => {
+            app.getList('FieldList', (fieldlist) => {
+                let dropDownFieldList =  fieldlist.qFieldList.qItems.map(field => {
+                    return {value:field.qName,label:field.qName}
+                })
+                dropDownFieldList.unshift({value:'None',label:'None'})
+                resolve(dropDownFieldList)
+            })
+        }) 
+    }
+    constructor(private label:string, private ref: string) {
+        this.ref = 'custom.context.' + ref;
+    }
+}
+
+const context = {
+    type: "items",
+    label: 'Context',
+    items: {
+        selectionText: contextText,
+        contextDropDownOne: new ContextDropDown('Field One', 'fieldOne'),
+        contextDropDownTwo: new ContextDropDown('Field Two', 'fieldTwo'),
+        contextDropDownThree: new ContextDropDown('Field Three', 'fieldThree'),
+        contextDropDownFour: new ContextDropDown('Field Four', 'fieldFour'),
+        contextDropDownFive: new ContextDropDown('Field Five', 'fieldFive'),
+    }
+}
+
+
+
+
+// *****************************************************************************
+// APPEARANCE 
 // *****************************************************************************
 
 
@@ -151,8 +208,6 @@ const aboutText = {
 };
 
 
-
-
 const about = {
     type: "items",
     label: 'About',
@@ -172,12 +227,12 @@ const extDefinition = {
         keyDimensions: keyDimensions,
         measures: measures,
         sorting: sorting,
+        context: context,
         appearance: appearanceSection,
         extSettings: extSettings,
         about: about
     }
 }
-
 
 
 

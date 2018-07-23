@@ -19,8 +19,9 @@ class Comment {
       private author: string,
       private comment: string,
       private dimensions: any,
+      private context: SelectionContext,
       private extensionId: string
     ) {}
-  }
+}
 
   export {Comment}

@@ -24,7 +24,11 @@ class CommentTblCntrl implements ng.IController {
   private tblBodyHeight: number;
   private tblFooterHeight: number;
   private commentColWidth:number;
+  private _propertiesPanel: any;
+  private headerWidth: number;
   private _tblCols: {cId: string, headerTitle: string, type:string, colWidth: number}[]
+  private context: SelectionContext;
+  private _maxY: number;
 
   public get dimensionsInfo(): any {
     return this._dimensionsInfo;
@@ -35,7 +39,6 @@ class CommentTblCntrl implements ng.IController {
     return this._measureInfo;
   }
   
-  private _maxY: number;
   public get maxY(): number {
     return this._maxY;
   }
@@ -167,16 +170,22 @@ class CommentTblCntrl implements ng.IController {
         tblCols.push({cId: 'comment', headerTitle: 'Comments', type: 'comment', colWidth: 400})
 
         this._model.app.getObject(this._model.id).then(genObj => {
+
+        
           genObj.getProperties().then(genObjProps => {
-
-            let savedIds = genObjProps.hyTblCols.map(col => col.cId).toString()
-            let cubeIds = tblCols.map(col => col.cId).toString()
-
-            if(savedIds === cubeIds) {
-              this._tblCols = genObjProps.hyTblCols
+            if(genObjProps.hyTblCols) {
+              let savedIds = genObjProps.hyTblCols.map(col => col.cId).toString()
+              let cubeIds = tblCols.map(col => col.cId).toString()
+  
+              if(savedIds === cubeIds) {
+                this._tblCols = genObjProps.hyTblCols
+              } else {
+                this._tblCols = tblCols
+              }
             } else {
               this._tblCols = tblCols
             }
+
           }).catch(err => console.log('could not get gen obj props', err))
         }).catch(err => console.log('could not get obj', err))
     } catch(err) {
@@ -235,15 +244,21 @@ class CommentTblCntrl implements ng.IController {
 
   // ================== API CALLS =======================================//
   private addOrUpdateComment = function(row:EngineAPI.INxCellRows) {
-    let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id)
 
-    this.http({
-      url: this.apiCommentRoute +  "add_new_comment",
-      method: "POST",
-      data: { newComment: JSON.stringify(newComment) },
-      headers: { "Content-Type": "application/json" }
-    }).then(res => this._model.emit("changed")
-    ).catch(err => console.log('could not add new comment',err))
+    //this.getAppSelections().then(selections => {
+
+      let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this.context, this._model.id)
+
+      this.http({
+        url: this.apiCommentRoute +  "add_new_comment",
+        method: "POST",
+        data: { newComment: JSON.stringify(newComment) },
+        headers: { "Content-Type": "application/json" }
+      }).then(res => this._model.emit("changed")
+      ).catch(err => console.log('could not add new comment',err))
+
+    //}).catch(err => console.log('could not get app selections', err))
+
   }
 
   private deleteComment = function(row:EngineAPI.INxCellRows) { 
@@ -259,12 +274,13 @@ class CommentTblCntrl implements ng.IController {
 
     // ================== GUI RELATED FUNCTIONS =======================================//
 
-  private getSize(): ElementSize {
+    private getSize(): ElementSize {
     return {
           height: this.element.height(),
           width: this.element.width()
       };
     }
+
 
     private calcCommentColWidth(extWidth:number) {
   
@@ -289,9 +305,17 @@ class CommentTblCntrl implements ng.IController {
       this.showEditForCell = -1;
       this.textAreaComment = "";
     }
+
+    private getContext() {
+      return {
+        fieldOne: this._propertiesPanel.context.fieldOne,
+        fieldTwo: this._propertiesPanel.context.fieldTwo,
+        fieldThree: this._propertiesPanel.context.fieldThree,
+        fieldFour: this._propertiesPanel.context.fieldFour,
+        fieldFive: this._propertiesPanel.context.fieldFive,
+      }
+    }
     
-    private _propertiesPanel: object;
-    private headerWidth: number;
 
 
 
@@ -319,6 +343,36 @@ class CommentTblCntrl implements ng.IController {
       }
     }
 
+
+    /*
+
+    private getAppSelections() {
+      return new Promise((resolve,reject) => {
+
+      let params = {
+            "qInfo": {
+              "qId": "CurrentSelection",
+              "qType": "CurrentSelection"
+            },
+            "qSelectionObjectDef": {}
+      }
+      this._model.app.createSessionObject(params).then(sessionObj => {
+        sessionObj.getLayout().then(sessionObjLayout => {
+          let appSelections = (sessionObjLayout as any).qSelectionObject.qSelections.map((selection => {return {field: selection.qField, value: selection.qSelected }}))
+          resolve(appSelections)
+        })
+      })
+      })
+    }
+
+    */
+   
+
+
+
+
+  
+
     private saveProperties() {
       console.log('saving extension properties');
       this._model.app.getObject(this._model.id).then(extObj =>{
@@ -330,25 +384,28 @@ class CommentTblCntrl implements ng.IController {
 
           newProperties.hyTblCols = this._tblCols;
 
-          newProperties.testProp = 'sav2';
           extObj.setProperties(newProperties)
           .then(() => extObj.getLayout())
         })
       })
-
     }
-
 
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http", "$window"];
 
   constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider, private window:ng.IWindowService) {
+    
     const that: any = this;
 
+
+
     
-    // horizontal Scrollbar ================================================
-    
+    // GET USER INFO ============================================= >>>>>>>>>>>
+    this.globalObj = that._model.session.app.global;
+    this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
+
+    // SCROLLBARS ================================================ >>>>>>>>>>>
 
     let header:any = this.element.children()[0]
     let headerTableContainer = header.children[0]
@@ -377,48 +434,34 @@ class CommentTblCntrl implements ng.IController {
 
     }
    
-    // ======================================================================
+    // WATCHERS ================================================ >>>>>>>>>>>
 
 
+    
     this._propertiesPanel = that._model.layout.custom
 
-    // GLOBAL OBJECT
-    this.globalObj = that._model.session.app.global;
-
-    // GET AUTHENTICATED USER
-    this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
-
-      // track changes of size
+    // ELEMENT SIZE
     that.scope.$watch("vm.getSize()", (newValue: ElementSize) => {
       that.calcCommentColWidth(newValue.width)
       that.calcTblHeight(newValue.height)
       }, true);
 
 
+    // EDIT MODE
     that.scope.$watch("vm._propertiesPanel.commentEditMode", (newValue:boolean) => {
         that.commentEditMode = newValue;
     })
   
+    
+    that.scope.$watch("vm.getContext()", (newContext:SelectionContext) => {
+      this.context = newContext;
+    }, true)
+    
 
-    // save scope variables ==================================================
-
-
-
-    // DEV ===================================================
-    that._model.app.getObject(that._model.id).then(extObj =>{
-
-      extObj.getProperties().then(extProps => {
-        console.log('extprops');
-          console.log(extProps);
-
-      })
-    })
-    // END DEV ===================================================
 
     
 
-    
-    // saving properties
+    // SAVE PROPERTIES ==========================================================================
     window.onbeforeunload = function functionName() {
       console.log('beforeunload');
       that.saveProperties();

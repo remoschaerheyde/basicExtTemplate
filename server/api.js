@@ -47,6 +47,8 @@ router.post('/comments/add_new_comment', (req,res) => {
     let pool = new pg.Pool(poolConfig);
     let newComment = JSON.parse(req.body.newComment);
 
+    console.log(newComment)
+
     try {
     pool.connect((connErr,db,done) => {
         if(connErr) {
