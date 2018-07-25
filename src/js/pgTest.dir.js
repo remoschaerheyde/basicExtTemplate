@@ -122,19 +122,23 @@
                         if (newWidth > that.minColWidthCommentCol) {
                             console.log(newWidth);
                             that._tblCols[index].colWidth = newWidth;
+                            that.touch.resetIndex();
                         }
                         else {
                             that._tblCols[index].colWidth = that.minColWidthCommentCol;
                             console.log("the comment col cannot be smaller than " + that.minColWidthCommentCol);
+                            that.touch.resetIndex();
                         }
                     }
                     else {
                         if (newWidth > that.minColWidth) {
                             that._tblCols[index].colWidth = newWidth;
+                            that.touch.resetIndex();
                         }
                         else {
-                            that._tblCols[index].colWidth = that.minColWidth;
+                            that._tblCols[index].colWidth = that._tblCols[index].colWidth;
                             console.log("columns cannot be smaller thant " + that.minColWidth);
+                            that.touch.resetIndex();
                         }
                     }
                     that.headerWidth = body.clientWidth;
@@ -393,31 +397,6 @@
                 }
             }
         };
-        CommentTblCntrl.prototype.resizeStartMobile = function () {
-            console.log('hello');
-        };
-        /*
-    
-        private getAppSelections() {
-          return new Promise((resolve,reject) => {
-    
-          let params = {
-                "qInfo": {
-                  "qId": "CurrentSelection",
-                  "qType": "CurrentSelection"
-                },
-                "qSelectionObjectDef": {}
-          }
-          this._model.app.createSessionObject(params).then(sessionObj => {
-            sessionObj.getLayout().then(sessionObjLayout => {
-              let appSelections = (sessionObjLayout as any).qSelectionObject.qSelections.map((selection => {return {field: selection.qField, value: selection.qSelected }}))
-              resolve(appSelections)
-            })
-          })
-          })
-        }
-    
-        */
         CommentTblCntrl.prototype.saveProperties = function () {
             var _this = this;
             console.log('saving extension properties');

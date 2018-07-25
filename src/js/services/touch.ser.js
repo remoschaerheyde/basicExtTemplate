@@ -23,6 +23,9 @@
         this.setIndex = function (currentIndex) {
             this.currentIndex = currentIndex;
         };
+        this.resetIndex = function () {
+            this.currentIndex = undefined;
+        };
     }
     exports.TouchService = TouchService;
 });

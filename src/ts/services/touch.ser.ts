@@ -18,6 +18,10 @@ export function TouchService() {
         this.currentIndex = currentIndex
     }
 
+    this.resetIndex = function() {
+        this.currentIndex = undefined; 
+    }
+
 
 
 

@@ -15,11 +15,9 @@ import {TouchFactory} from "./directives/touch.dir"
 qvangular.service<services.IRegistrationProvider>("$registrationProvider", services.RegistrationProvider).implementObject(qvangular);
 qvangular.service<services.IRegistrationProvider>('£touch',TouchService);
 
-
 // DIRECTIVES ===============================================================================
 registerDirective(qvangular, ExampleDirectiveFactory(), "pgTest")
 registerDirective(qvangular, TouchFactory(), "ngTouch")
-
 
 const $injector = qvangular.$injector;
 
