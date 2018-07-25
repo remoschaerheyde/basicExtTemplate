@@ -414,97 +414,12 @@ class CommentTblCntrl implements ng.IController {
     private touchStartPosition:any;
 
   // ============================== injector / Constructor ======================================================
-  static $inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touchStart", "£touch"];
+  static $inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touch"];
 
-  constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider, private window:ng.IWindowService, private touchStart:any, private touch:any) {
+  constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider, private window:ng.IWindowService, private touch:any) {
     
     const that: any = this;
    
-    that.scope.$watch("vm.touch.getWidthChange()", (widthChange) => {
-      let index = that.touch.getIndex()
-
-      if(typeof widthChange !== 'undefined' && typeof index !== 'undefined') {
-
-        let newWidth = that._tblCols[index].colWidth + widthChange
-
-         if(index === that.commentColIndex) {
-           console.log('setting comment col');
-          if(newWidth > that.minColWidthCommentCol) {
-            console.log(newWidth);
-            that._tblCols[index].colWidth = newWidth
-          } else {
-            that._tblCols[index].colWidth = that.minColWidthCommentCol
-            console.log(`the comment col cannot be smaller than ${that.minColWidthCommentCol}`);
-          }
-        } else {
-          if(newWidth > that.minColWidth) { 
-            that._tblCols[index].colWidth = newWidth
-          } else {
-            that._tblCols[index].colWidth = that.minColWidth;
-            console.log(`columns cannot be smaller thant ${that.minColWidth}`);
-          }
-        }
-        that.headerWidth = body.clientWidth
-        that.$scope.$apply()
-      }
-     },true)
-    
-
-
-   
-    // // TOUCHSCREEN SUPPORT =======================================================================================
-    // that.scope.$watch("vm.touchStart.touchStartPosition", (newValue) => {
-    //   console.log('touchstart');
-    //  console.log(this.touchStart.touchStartPosition);
-    //   //this.resizeStart()
-    //   let width = this._tblCols[this.touchStart.index].colWidth
-    //   that.resizeColumn = {width: width, index: this.touchStart.index, cursorStartPosition: this.touchStart.touchStartPosition}
-    // })
-
-    // element.bind('touchmove', function(event:any) {
-    //   that.touchTrack = event.touches[0].clientX
-    // })
-
-    // element.bind('touchend', function(event:any) {
-    //   //let touchend = (event.originalEvent as any).touches[0].pageX
-    //     console.log('touchend');
-    //     console.log(that.touchTrack);
-    //  // console.log(touchend);
-
-    //  if(that.resizeColumn) {
-    //    console.log('resizing column');
-    //   let resizeEnd = that.touchTrack;
-
-    //   let headerElementStartPosition = (that.resizeColumn.cursorStartPosition - that.resizeColumn.width);
-    //   let newWidth = resizeEnd - headerElementStartPosition;
-    //   let minColWidth = 20;
-    //   let minColWidthCommentCol = 300
-
-    //   if(that.resizeColumn.index === that.commentColIndex) {
-    //     if(newWidth >= minColWidthCommentCol) {
-    //         that._tblCols[that.resizeColumn.index].colWidth = newWidth;
-    //         that.resizeColumn = undefined;
-    //     } else {
-    //       that._tblCols[that.resizeColumn.index].colWidth = 300;
-    //       that.resizeColumn = undefined;
-    //     }
-    //   } else {
-    //     if(newWidth >= minColWidth) {
-    //       that._tblCols[that.resizeColumn.index].colWidth = newWidth;
-
-    //       that.resizeColumn = undefined;
-    //     } else {
-    //       that._tblCols[that.resizeColumn.index].colWidth = 20;
-    //       that.resizeColumn = undefined;
-    //     }
-    //   }
-
-      
-    // }
-    //})
-
-
-
 
     // GET USER INFO ============================================= >>>>>>>>>>>
     this.globalObj = that._model.session.app.global;
@@ -541,8 +456,6 @@ class CommentTblCntrl implements ng.IController {
    
     // WATCHERS ================================================ >>>>>>>>>>>
 
-
-    
     this._propertiesPanel = that._model.layout.custom
 
     // ELEMENT SIZE
@@ -558,14 +471,36 @@ class CommentTblCntrl implements ng.IController {
     })
   
     
-    // that.scope.$watch("vm.getContext()", (newContext:SelectionContext) => {
-    //   this.context = newContext;
-    // }, true)
-
-    // 
-
-
+ 
+        // RESIZE COLUMNS ON TOUCHSCREENS
+        that.scope.$watch("vm.touch.getWidthChange()", (widthChange) => {
+          let index = that.touch.getIndex()
     
+          if(typeof widthChange !== 'undefined' && typeof index !== 'undefined') {
+    
+            let newWidth = that._tblCols[index].colWidth + widthChange
+    
+             if(index === that.commentColIndex) {
+               console.log('setting comment col');
+              if(newWidth > that.minColWidthCommentCol) {
+                console.log(newWidth);
+                that._tblCols[index].colWidth = newWidth
+              } else {
+                that._tblCols[index].colWidth = that.minColWidthCommentCol
+                console.log(`the comment col cannot be smaller than ${that.minColWidthCommentCol}`);
+              }
+            } else {
+              if(newWidth > that.minColWidth) { 
+                that._tblCols[index].colWidth = newWidth
+              } else {
+                that._tblCols[index].colWidth = that.minColWidth;
+                console.log(`columns cannot be smaller thant ${that.minColWidth}`);
+              }
+            }
+            that.headerWidth = body.clientWidth
+            that.$scope.$apply()
+          }
+         },true)
 
 
 
