@@ -3,7 +3,7 @@
   width: 100%; }
 
 .hy-table {
-  width: 500px;
+  width: 100px;
   border-collapse: collapse;
   table-layout: fixed; }
 
@@ -72,7 +72,7 @@
 
 .hy-comment__view--small {
   background: #fff;
-  word-wrap: normal;
+  word-wrap: break-word;
   border-radius: 0px; }
 
 .hy-comment__view--small:hover {
@@ -92,7 +92,6 @@
     .hy-comment__view--large-preview .hy-comment__edit-body .hy-comment__textarea {
       height: 100px;
       resize: none;
-      width: 100%;
       border-radius: 0px;
       border: none; }
       .hy-comment__view--large-preview .hy-comment__edit-body .hy-comment__textarea :focus {

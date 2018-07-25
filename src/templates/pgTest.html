@@ -5,11 +5,11 @@
                 <thead class="hy-header">
                     <tr>
                         <th class="hy-header-item" ng-repeat="col in vm._tblCols track by $index" >
-                            <div class="hy-header-item__container" ng-style="{'width': col.colWidth + 'px'}" >
+                            <div class="hy-header-item__container" ng-style="{'width': col.colWidth + 'px'}" ng-touch index="$index" >
                                 <div class="hy-header-item__content-container hy-header-item__content-container--title" >
                                     <span class="hy-header-item__text">{{col.headerTitle}}</span>
                                 </div>
-                                <div class="hy-header-item__content-container hy-header-item__content-container--resize-box" ng-mousedown="vm.resizeStart($event, $index)"></div>
+                                <div class="hy-header-item__content-container hy-header-item__content-container--resize-box" ng-mousedown="vm.resizeStart($event, $index)" ng-touch-start index ="$index"></div>
                             </div>
                         </th>
                     </tr>

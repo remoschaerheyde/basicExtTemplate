@@ -14,14 +14,18 @@
     require("./customInterfaces");
     var commentClass_1 = require("./commentClass");
     var CommentTblCntrl = /** @class */ (function () {
-        function CommentTblCntrl(timeout, element, scope, http, window) {
+        function CommentTblCntrl(timeout, element, scope, http, window, touchStart, touch) {
             var _this = this;
             this.element = element;
             this.scope = scope;
             this.http = http;
             this.window = window;
+            this.touchStart = touchStart;
+            this.touch = touch;
             this.stringSeperator = '|';
             this.apiCommentRoute = 'http://localhost:5000/api/comments/';
+            this.minColWidth = 20;
+            this.minColWidthCommentCol = 300;
             // ================== Set the data of the session object ================================//
             this.getDbComments = function (customHyperCubeLayout) {
                 var _this = this;
@@ -73,6 +77,76 @@
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not delete comment', err); });
             };
             var that = this;
+            that.scope.$watch("vm.touch.getWidthChange()", function (widthChange) {
+                var index = that.touch.getIndex();
+                if (typeof widthChange !== 'undefined' && typeof index !== 'undefined') {
+                    var newWidth = that._tblCols[index].colWidth + widthChange;
+                    if (index === that.commentColIndex) {
+                        console.log('setting comment col');
+                        if (newWidth > that.minColWidthCommentCol) {
+                            console.log(newWidth);
+                            that._tblCols[index].colWidth = newWidth;
+                        }
+                        else {
+                            that._tblCols[index].colWidth = that.minColWidthCommentCol;
+                            console.log("the comment col cannot be smaller than " + that.minColWidthCommentCol);
+                        }
+                    }
+                    else {
+                        if (newWidth > that.minColWidth) {
+                            that._tblCols[index].colWidth = newWidth;
+                        }
+                        else {
+                            that._tblCols[index].colWidth = that.minColWidth;
+                            console.log("columns cannot be smaller thant " + that.minColWidth);
+                        }
+                    }
+                    that.headerWidth = body.clientWidth;
+                    that.$scope.$apply();
+                }
+            }, true);
+            // // TOUCHSCREEN SUPPORT =======================================================================================
+            // that.scope.$watch("vm.touchStart.touchStartPosition", (newValue) => {
+            //   console.log('touchstart');
+            //  console.log(this.touchStart.touchStartPosition);
+            //   //this.resizeStart()
+            //   let width = this._tblCols[this.touchStart.index].colWidth
+            //   that.resizeColumn = {width: width, index: this.touchStart.index, cursorStartPosition: this.touchStart.touchStartPosition}
+            // })
+            // element.bind('touchmove', function(event:any) {
+            //   that.touchTrack = event.touches[0].clientX
+            // })
+            // element.bind('touchend', function(event:any) {
+            //   //let touchend = (event.originalEvent as any).touches[0].pageX
+            //     console.log('touchend');
+            //     console.log(that.touchTrack);
+            //  // console.log(touchend);
+            //  if(that.resizeColumn) {
+            //    console.log('resizing column');
+            //   let resizeEnd = that.touchTrack;
+            //   let headerElementStartPosition = (that.resizeColumn.cursorStartPosition - that.resizeColumn.width);
+            //   let newWidth = resizeEnd - headerElementStartPosition;
+            //   let minColWidth = 20;
+            //   let minColWidthCommentCol = 300
+            //   if(that.resizeColumn.index === that.commentColIndex) {
+            //     if(newWidth >= minColWidthCommentCol) {
+            //         that._tblCols[that.resizeColumn.index].colWidth = newWidth;
+            //         that.resizeColumn = undefined;
+            //     } else {
+            //       that._tblCols[that.resizeColumn.index].colWidth = 300;
+            //       that.resizeColumn = undefined;
+            //     }
+            //   } else {
+            //     if(newWidth >= minColWidth) {
+            //       that._tblCols[that.resizeColumn.index].colWidth = newWidth;
+            //       that.resizeColumn = undefined;
+            //     } else {
+            //       that._tblCols[that.resizeColumn.index].colWidth = 20;
+            //       that.resizeColumn = undefined;
+            //     }
+            //   }
+            // }
+            //})
             // GET USER INFO ============================================= >>>>>>>>>>>
             this.globalObj = that._model.session.app.global;
             this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
@@ -112,6 +186,7 @@
             // that.scope.$watch("vm.getContext()", (newContext:SelectionContext) => {
             //   this.context = newContext;
             // }, true)
+            // 
             // SAVE PROPERTIES ==========================================================================
             window.onbeforeunload = function functionName() {
                 console.log('beforeunload');
@@ -259,6 +334,7 @@
             catch (err) {
                 console.log('could not set data', err);
             }
+            console.log(this);
         };
         // =================== Destory session object ============================================= //
         CommentTblCntrl.prototype.destroySessionObject = function () {
@@ -332,19 +408,39 @@
         };
         CommentTblCntrl.prototype.resizeStart = function (event, index) {
             // mousedown event
-            this.resizeColumn = { width: this._tblCols[index].colWidth, index: index, cursorStartPosition: event.clientX };
+            var width = this._tblCols[index].colWidth;
+            var cursorStartPosition = event.clientX;
+            this.resizeColumn = { width: width, index: index, cursorStartPosition: cursorStartPosition };
         };
         CommentTblCntrl.prototype.resizeEnd = function (event) {
             if (this.resizeColumn) {
                 var resizeEnd = event.clientX;
                 var headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width);
                 var newWidth = resizeEnd - headerElementStartPosition;
-                var minColWidth = 20;
-                if (newWidth >= minColWidth) {
-                    this._tblCols[this.resizeColumn.index].colWidth = newWidth;
-                    this.resizeColumn = undefined;
+                if (this.resizeColumn.index === this.commentColIndex) {
+                    if (newWidth >= this.minColWidthCommentCol) {
+                        this._tblCols[this.resizeColumn.index].colWidth = newWidth;
+                        this.resizeColumn = undefined;
+                    }
+                    else {
+                        this._tblCols[this.resizeColumn.index].colWidth = 300;
+                        this.resizeColumn = undefined;
+                    }
+                }
+                else {
+                    if (newWidth >= this.minColWidth) {
+                        this._tblCols[this.resizeColumn.index].colWidth = newWidth;
+                        this.resizeColumn = undefined;
+                    }
+                    else {
+                        this._tblCols[this.resizeColumn.index].colWidth = 20;
+                        this.resizeColumn = undefined;
+                    }
                 }
             }
+        };
+        CommentTblCntrl.prototype.resizeStartMobile = function () {
+            console.log('hello');
         };
         /*
     
@@ -382,7 +478,7 @@
             });
         };
         // ============================== injector / Constructor ======================================================
-        CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http", "$window"];
+        CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touchStart", "£touch"];
         return CommentTblCntrl;
     }());
     function ExampleDirectiveFactory() {

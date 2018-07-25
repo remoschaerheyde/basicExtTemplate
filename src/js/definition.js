@@ -137,7 +137,7 @@
         label: "Hiding the 'Key Dimensions' window helps to ensure that users don't accidently add or remove dimensions which are needed in order to connect the comments to the data matrix of the extension.",
         component: "text"
     };
-    var testSwitch = {
+    var keyDimensionSwitch = {
         type: "boolean",
         component: "switch",
         label: "Hide Key Dimensions",
@@ -162,7 +162,7 @@
                 type: "items",
                 items: {
                     keySettingsText: keySettingsText,
-                    testSwitch: testSwitch
+                    keyDimensionSwitch: keyDimensionSwitch
                 }
             }
         }

@@ -163,7 +163,7 @@ const keySettingsText = {
 };
 
 
-const testSwitch = {
+const keyDimensionSwitch = {
     type: "boolean",
     component: "switch",
     label: "Hide Key Dimensions",
@@ -190,7 +190,7 @@ const extSettings = {
             type: "items",
             items: {
                 keySettingsText: keySettingsText,
-                testSwitch: testSwitch
+                keyDimensionSwitch: keyDimensionSwitch
             }
         }
     }

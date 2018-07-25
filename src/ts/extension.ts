@@ -8,12 +8,26 @@ import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci"
 import {registerDirective} from "./ngRegister";
 import extDefinition from "./definition";
 import initProps from "./initProps";
+import {TouchStartFactory} from "./directives/touchstart.dir"
+import {TouchStartService} from "./services/touchStart.ser"
+import {TouchService} from "./services/touch.ser"
+import {TouchFactory} from "./directives/touch.dir"
 
+// SERVICES ===============================================================================
 qvangular.service<services.IRegistrationProvider>("$registrationProvider", services.RegistrationProvider).implementObject(qvangular);
+qvangular.service<services.IRegistrationProvider>('£touchStart',TouchStartService);
+qvangular.service<services.IRegistrationProvider>('£touch',TouchService);
 
+
+
+
+// DIRECTIVES ===============================================================================
 registerDirective(qvangular, ExampleDirectiveFactory(), "pgTest")
-registerDirective(qvangular, ExampleDirectiveFactory2(), "test")
+registerDirective(qvangular, TouchStartFactory(), "ngTouchStart")
+registerDirective(qvangular, TouchFactory(), "ngTouch")
 
+
+const $injector = qvangular.$injector;
 
 class ExampleExtension {
 
@@ -38,7 +52,9 @@ export = {
     template: template,
     controller: ["$scope", function (scope: utils.IVMScope<ExampleExtension>) {
         scope.vm = new ExampleExtension(utils.getEnigma(scope));
-        (scope as any).vm2 = new ExampleExtension(utils.getEnigma(scope));
+        (scope as any).touchStart = new ExampleExtension(utils.getEnigma(scope));
+        (scope as any).touchCntrl = new ExampleExtension(utils.getEnigma(scope));
+
 
     }]
 };
