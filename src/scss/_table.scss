@@ -1,9 +1,16 @@
 // GLOBAL STYLES ===========================================================
 
 .hy-directive-container {
-    height: 100%;
-    width: 100%;
+    height: 99%;
+    width: 99%;
+    padding: 2px;
+
+   // border: 2px solid black;
+    background: #fcfcfc;
 }
+
+// #f7f7f7
+// #fcfcfc
 
 .hy-table {
     width: 100px;
@@ -11,16 +18,16 @@
     table-layout: fixed;
 }
 
+
+
 // Table ======================================================================
 
 .hy-table-container {
     display: block;
+
 }
 
-.hy-table-container--body {
-    overflow: auto;
-    height: 95%;
-}
+
 
 .hy-header-item__container,
 .hy-cell,
@@ -28,13 +35,26 @@
     text-align: left;
 }
 
-// HEADER BLOCK =================================================================
-
+.hy-table-container--body {
+    overflow: auto;
+    height: 95%;
+    border-bottom: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
 
 .hy-table-container--header {
     overflow: hidden;
     height: 5%;
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+
 }
+
+// HEADER BLOCK =================================================================
+
+
+
 
 .hy-header-container {
     background: $hdrFooterColor;
@@ -64,6 +84,7 @@
     overflow: hidden; 
     height: 100%;
     white-space: nowrap;
+    padding-left: 3px;
 }
 
 .hy-header-item__content-container--resize-box {
@@ -89,13 +110,19 @@
 .hy-cell {
     border-right: 1px solid black;
     border-bottom: 1px solid $tblBodyBorderColor;
-    //background: #ECF0F2;
+    background: #fff;
+    overflow: hidden;
 }
 
 
 
 
 .hy-cell__container {
+    height: 100%;
+    padding-left: 3px;
+}
+
+.hy-comment {
     height: 100%;
 }
 

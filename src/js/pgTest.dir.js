@@ -273,17 +273,24 @@
                 tblCols_1.push({ cId: 'comment', headerTitle: 'Comments', type: 'comment', colWidth: 400 });
                 this._model.app.getObject(this._model.id).then(function (genObj) {
                     genObj.getProperties().then(function (genObjProps) {
+                        console.log('genObjProps -------->');
+                        console.log(_this._model.id);
+                        console.log(genObjProps);
                         if (genObjProps.hyTblCols) {
+                            console.log(genObjProps.hyTblCols);
                             var savedIds = genObjProps.hyTblCols.map(function (col) { return col.cId; }).toString();
                             var cubeIds = tblCols_1.map(function (col) { return col.cId; }).toString();
                             if (savedIds === cubeIds) {
+                                console.log('1');
                                 _this._tblCols = genObjProps.hyTblCols;
                             }
                             else {
+                                console.log('2');
                                 _this._tblCols = tblCols_1;
                             }
                         }
                         else {
+                            console.log('3');
                             _this._tblCols = tblCols_1;
                         }
                     }).catch(function (err) { return console.log('could not get gen obj props', err); });
@@ -400,16 +407,26 @@
         CommentTblCntrl.prototype.saveProperties = function () {
             var _this = this;
             console.log('saving extension properties');
+            console.log(this._model.id);
             this._model.app.getObject(this._model.id).then(function (extObj) {
                 extObj.getProperties().then(function (extProps) {
                     var newProperties = extProps;
                     // ADD PROPERTIES HERE ============>>
                     newProperties.hyTblCols = _this._tblCols;
                     extObj.setProperties(newProperties)
-                        .then(function () { return extObj.getLayout(); });
+                        .then(function () {
+                        extObj.getLayout().then(function (layout) { return console.log(layout); });
+                    });
                 });
             });
         };
+        // dev
+        CommentTblCntrl.prototype.savePropsManually = function () {
+            console.log('  savePropsManually');
+            this.saveProperties();
+            console.log('saving props');
+        };
+        // dev
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touch"];
         return CommentTblCntrl;

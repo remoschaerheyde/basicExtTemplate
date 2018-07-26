@@ -1,15 +1,15 @@
-<div class="hy-directive-container" ng-mouseup="vm.resizeEnd($event)">
+<div class="hy-directive-container" ng-mouseup="vm.resizeEnd($event); vm.resizeMode = -1">
     <div class="hy-header-container">
         <div class="hy-table-container hy-table-container--header" ng-style="{'width': vm.headerWidth + 'px'}">
             <table class="hy-table">
                 <thead class="hy-header">
                     <tr>
                         <th class="hy-header-item" ng-repeat="col in vm._tblCols track by $index" >
-                            <div class="hy-header-item__container" ng-style="{'width': col.colWidth + 'px'}" ng-touch index="$index" >
+                            <div class="hy-header-item__container" ng-style="{'width': col.colWidth + 'px'}" ng-class="{'hy-header-item__container--resize': vm.resizeMode == $index}" ng-touch index="$index" >
                                 <div class="hy-header-item__content-container hy-header-item__content-container--title" >
                                     <span class="hy-header-item__text">{{col.headerTitle}}</span>
                                 </div>
-                                <div class="hy-header-item__content-container hy-header-item__content-container--resize-box" ng-mousedown="vm.resizeStart($event, $index)" ng-touch-start index ="$index"></div>
+                                <div class="hy-header-item__content-container hy-header-item__content-container--resize-box" ng-mousedown="vm.resizeStart($event, $index); vm.resizeMode = $index" ng-touch-start index ="$index"></div>
                             </div>
                         </th>
                     </tr>
@@ -28,12 +28,12 @@
                         <span class="hy-cell__text">{{cell.qText}}</span>
                     </div>
                     
-                    <!--================= display comments ==================================================== -->
-                    <div class="hy-cell__container" ng-if="$index === vm.commentColIndex">
-                        <div class="hy-comment__view--small" ng-class="{'commentEditMode': vm.commentEditMode}" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="cell.qText !== '' || vm.commentEditMode === true ? vm.showEditForCell = outerRowIndex:  vm.showEditForCell =-1 ; vm.textAreaComment = cell.qText;">
+                    <!--================= display comments Small ==================================================== -->
+                    <div class="hy-comment" ng-if="$index === vm.commentColIndex">
+                        <div class="hy-cell__container hy-comment__view--small" ng-class="{'commentEditMode': vm.commentEditMode}" ng-hide="vm.showEditForCell === outerRowIndex" ng-click="cell.qText !== '' || vm.commentEditMode === true ? vm.showEditForCell = outerRowIndex:  vm.showEditForCell =-1 ; vm.textAreaComment = cell.qText;">
                             <span class="hy-cell__text"> {{cell.qText}}</span>
                             <span class="hy-comment__h-empty-div">.</span> 
-                    </div>
+                        </div>
 
                         <!-- display comments large -->
                     <div class="hy-comment__view--large-preview lui-dialog" ng-show="vm.showEditForCell === outerRowIndex">

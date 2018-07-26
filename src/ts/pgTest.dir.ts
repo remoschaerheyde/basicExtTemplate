@@ -176,18 +176,27 @@ class CommentTblCntrl implements ng.IController {
 
         this._model.app.getObject(this._model.id).then(genObj => {
 
-        
           genObj.getProperties().then(genObjProps => {
+
+            
+            console.log('genObjProps -------->')
+            console.log(this._model.id)
+            console.log(genObjProps)
             if(genObjProps.hyTblCols) {
+
+              console.log(genObjProps.hyTblCols)
               let savedIds = genObjProps.hyTblCols.map(col => col.cId).toString()
               let cubeIds = tblCols.map(col => col.cId).toString()
   
               if(savedIds === cubeIds) {
+                console.log('1')
                 this._tblCols = genObjProps.hyTblCols
               } else {
+                console.log('2')
                 this._tblCols = tblCols
               }
             } else {
+              console.log('3')
               this._tblCols = tblCols
             }
 
@@ -314,16 +323,6 @@ class CommentTblCntrl implements ng.IController {
       this.textAreaComment = "";
     }
 
-    // private getContext() {
-    //   return {
-    //     fieldOne: this._propertiesPanel.context.fieldOne,
-    //     fieldTwo: this._propertiesPanel.context.fieldTwo,
-    //     fieldThree: this._propertiesPanel.context.fieldThree,
-    //     fieldFour: this._propertiesPanel.context.fieldFour,
-    //     fieldFive: this._propertiesPanel.context.fieldFive,
-    //   }
-    // }
-    
 
     // colum Resize Settings
     private resizeColumn:{width:number, index: number, cursorStartPosition: number};
@@ -367,6 +366,8 @@ class CommentTblCntrl implements ng.IController {
     private saveProperties() {
 
       console.log('saving extension properties');
+
+      console.log(this._model.id)
       this._model.app.getObject(this._model.id).then(extObj =>{
 
         extObj.getProperties().then(extProps => {
@@ -377,12 +378,31 @@ class CommentTblCntrl implements ng.IController {
           newProperties.hyTblCols = this._tblCols;
 
           extObj.setProperties(newProperties)
-          .then(() => extObj.getLayout())
+          .then(() => {
+            extObj.getLayout().then(layout => console.log(layout))
+          
+          })
         })
       })
     }
+    
 
-    private touchStartPosition:any;
+
+    // dev
+    private savePropsManually() {
+
+      
+      console.log(
+      '  savePropsManually'
+      );
+      this.saveProperties()
+
+      console.log('saving props');
+    }
+
+    // dev
+
+
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touch"];
@@ -440,9 +460,7 @@ class CommentTblCntrl implements ng.IController {
         that.commentEditMode = newValue;
     })
   
-    
- 
-        // RESIZE COLUMNS ON TOUCHSCREENS
+    // RESIZE COLUMNS ON TOUCHSCREENS
         that.scope.$watch("vm.touch.getWidthChange()", (widthChange) => {
           let index = that.touch.getIndex()
     
@@ -472,7 +490,6 @@ class CommentTblCntrl implements ng.IController {
                 that._tblCols[index].colWidth = that._tblCols[index].colWidth;
                 console.log(`columns cannot be smaller thant ${that.minColWidth}`);
                 that.touch.resetIndex()
-
               }
             }
             that.headerWidth = body.clientWidth
