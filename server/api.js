@@ -33,7 +33,7 @@ router.post('/comments/get_all', (req,res) => {
                         });            
                         res.setHeader('Content-Type', 'application/json');
                         res.status(200).send(JSON.stringify(commentsFound))
-                         db.end();
+                        db.end();
                     };
             })
         }

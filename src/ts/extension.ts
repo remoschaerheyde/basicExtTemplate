@@ -2,8 +2,7 @@
 import * as qvangular from "qvangular";
 import * as qlik from "qlik";
 import * as template from "text!../templates/extension.html";
-import { ExampleDirectiveFactory } from "./pgTest.dir";
-import { ExampleDirectiveFactory2 } from "./test.dir";
+import { ExampleDirectiveFactory } from "./hyComment.dir";
 import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci";
 import {registerDirective} from "./ngRegister";
 import extDefinition from "./definition";
@@ -16,7 +15,7 @@ qvangular.service<services.IRegistrationProvider>("$registrationProvider", servi
 qvangular.service<services.IRegistrationProvider>('£touch',TouchService);
 
 // DIRECTIVES ===============================================================================
-registerDirective(qvangular, ExampleDirectiveFactory(), "pgTest")
+registerDirective(qvangular, ExampleDirectiveFactory(), "hyComment")
 registerDirective(qvangular, TouchFactory(), "ngTouch")
 
 const $injector = qvangular.$injector;
@@ -27,6 +26,9 @@ class ExampleExtension {
 
     constructor(model: EngineAPI.IGenericObject) {
         this.model = model;
+
+
+
     }
 
     public isEditMode() {
@@ -36,6 +38,9 @@ class ExampleExtension {
             return true;
         }
     }
+
+
+
 }
 
 export = {

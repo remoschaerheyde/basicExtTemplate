@@ -4,12 +4,12 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "text!../templates/pgTest.html", "css!../css/main.css", "./customInterfaces", "./commentClass"], factory);
+        define(["require", "exports", "text!../templates/hyComment.html", "css!../css/main.css", "./customInterfaces", "./commentClass"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var template = require("text!../templates/pgTest.html");
+    var template = require("text!../templates/hyComment.html");
     require("css!../css/main.css");
     require("./customInterfaces");
     var commentClass_1 = require("./commentClass");
@@ -21,7 +21,7 @@
             this.http = http;
             this.window = window;
             this.touch = touch;
-            this.stringSeperator = '|';
+            this.stringSeperator = '||&||';
             this.apiCommentRoute = 'http://localhost:5000/api/comments/';
             this.minColWidth = 20;
             this.minColWidthCommentCol = 300;
@@ -76,6 +76,9 @@
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not delete comment', err); });
             };
             var that = this;
+            that.scope.$watch("vm.editMode", function (newValue) {
+                console.log(newValue);
+            });
             // GET USER INFO ============================================= >>>>>>>>>>>
             this.globalObj = that._model.session.app.global;
             this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
@@ -92,12 +95,11 @@
             };
             window.onresize = function (e) {
                 e.preventDefault();
-                // headerTableContainer.style.width = body.clientWidth
                 that.headerWidth = body.clientWidth;
                 that.scope.$apply();
             };
-            window.onload = function () {
-                //headerTableContainer.style.width = body.clientWidth
+            window.onload = function (e) {
+                e.preventDefault();
                 that.headerWidth = body.clientWidth;
                 that.scope.$apply();
             };
@@ -105,8 +107,9 @@
             this._propertiesPanel = that._model.layout.custom;
             // ELEMENT SIZE
             that.scope.$watch("vm.getSize()", function (newValue) {
+                that.headerWidth = body.clientWidth;
                 that.calcCommentColWidth(newValue.width);
-                that.calcTblHeight(newValue.height);
+                that.extHeight = newValue.height;
             }, true);
             // EDIT MODE
             that.scope.$watch("vm._propertiesPanel.commentEditMode", function (newValue) {
@@ -120,7 +123,6 @@
                     if (index === that.commentColIndex) {
                         console.log('setting comment col');
                         if (newWidth > that.minColWidthCommentCol) {
-                            console.log(newWidth);
                             that._tblCols[index].colWidth = newWidth;
                             that.touch.resetIndex();
                         }
@@ -273,9 +275,6 @@
                 tblCols_1.push({ cId: 'comment', headerTitle: 'Comments', type: 'comment', colWidth: 400 });
                 this._model.app.getObject(this._model.id).then(function (genObj) {
                     genObj.getProperties().then(function (genObjProps) {
-                        console.log('genObjProps -------->');
-                        console.log(_this._model.id);
-                        console.log(genObjProps);
                         if (genObjProps.hyTblCols) {
                             console.log(genObjProps.hyTblCols);
                             var savedIds = genObjProps.hyTblCols.map(function (col) { return col.cId; }).toString();
@@ -299,7 +298,6 @@
             catch (err) {
                 console.log('could not set data', err);
             }
-            console.log(this);
         };
         // =================== Destory session object ============================================= //
         CommentTblCntrl.prototype.destroySessionObject = function () {
@@ -360,19 +358,12 @@
                 this.commentColWidth = (extWidth - ((regColumnWidth * nbrOfClumns) + padding + totalLeftCellBorders));
             }
         };
-        CommentTblCntrl.prototype.calcTblHeight = function (extHeight) {
-            this.tblHeaderHeight = 28;
-            this.tblFooterHeight = 28;
-            var totalVerticalBorders = 2;
-            this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders);
-        };
         CommentTblCntrl.prototype.initGuiVars = function () {
             this.calcCommentColWidth(this.element.width());
             this.showEditForCell = -1;
             this.textAreaComment = "";
         };
         CommentTblCntrl.prototype.resizeStart = function (event, index) {
-            // mousedown event
             var width = this._tblCols[index].colWidth;
             var cursorStartPosition = event.clientX;
             this.resizeColumn = { width: width, index: index, cursorStartPosition: cursorStartPosition };
@@ -407,7 +398,6 @@
         CommentTblCntrl.prototype.saveProperties = function () {
             var _this = this;
             console.log('saving extension properties');
-            console.log(this._model.id);
             this._model.app.getObject(this._model.id).then(function (extObj) {
                 extObj.getProperties().then(function (extProps) {
                     var newProperties = extProps;
@@ -420,13 +410,6 @@
                 });
             });
         };
-        // dev
-        CommentTblCntrl.prototype.savePropsManually = function () {
-            console.log('  savePropsManually');
-            this.saveProperties();
-            console.log('saving props');
-        };
-        // dev
         // ============================== injector / Constructor ======================================================
         CommentTblCntrl.$inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touch"];
         return CommentTblCntrl;
@@ -452,4 +435,4 @@
     }
     exports.ExampleDirectiveFactory = ExampleDirectiveFactory;
 });
-//# sourceMappingURL=pgTest.dir.js.map
+//# sourceMappingURL=hyComment.dir.js.map

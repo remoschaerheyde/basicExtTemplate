@@ -1,4 +1,4 @@
-import * as template from "text!../templates/pgTest.html";
+import * as template from "text!../templates/hyComment.html";
 import "css!../css/main.css";
 import "./customInterfaces"
 import {Comment} from './commentClass';
@@ -13,7 +13,7 @@ class CommentTblCntrl implements ng.IController {
   private cubeWidthWithComments:number;
   private commentColIndex:number;
   private user: string;
-  private stringSeperator:string = '|';
+  private stringSeperator:string = '||&||';
   private showEditForCell: number;
   private _matrixData:EngineAPI.INxCellRows[];
   private textAreaComment:string;
@@ -31,6 +31,8 @@ class CommentTblCntrl implements ng.IController {
   private _maxY: number;
   private minColWidth:number = 20;
   private minColWidthCommentCol:number = 300;
+  private resizeColumn:{width:number, index: number, cursorStartPosition: number};
+  private extHeight:number;
 
   public get dimensionsInfo(): any {
     return this._dimensionsInfo;
@@ -178,10 +180,6 @@ class CommentTblCntrl implements ng.IController {
 
           genObj.getProperties().then(genObjProps => {
 
-            
-            console.log('genObjProps -------->')
-            console.log(this._model.id)
-            console.log(genObjProps)
             if(genObjProps.hyTblCols) {
 
               console.log(genObjProps.hyTblCols)
@@ -199,14 +197,12 @@ class CommentTblCntrl implements ng.IController {
               console.log('3')
               this._tblCols = tblCols
             }
-
           }).catch(err => console.log('could not get gen obj props', err))
         }).catch(err => console.log('could not get obj', err))
     } catch(err) {
       console.log('could not set data', err);
     }
 
-    console.log(this);
   }
 
   
@@ -310,12 +306,8 @@ class CommentTblCntrl implements ng.IController {
       }
     }
 
-    private calcTblHeight(extHeight:number) {
-      this.tblHeaderHeight = 28;
-      this.tblFooterHeight = 28;
-      let totalVerticalBorders:number = 2;
-      this.tblBodyHeight = extHeight - (this.tblHeaderHeight + this.tblFooterHeight + totalVerticalBorders)
-    }
+   
+
 
     private initGuiVars() {
       this.calcCommentColWidth(this.element.width())
@@ -324,12 +316,7 @@ class CommentTblCntrl implements ng.IController {
     }
 
 
-    // colum Resize Settings
-    private resizeColumn:{width:number, index: number, cursorStartPosition: number};
-
-    private resizeStart(event, index) {
-      // mousedown event
-     
+    private resizeStart(event, index) {     
       let width = this._tblCols[index].colWidth
       let cursorStartPosition = event.clientX
       this.resizeColumn = {width: width, index: index, cursorStartPosition: cursorStartPosition}
@@ -353,7 +340,6 @@ class CommentTblCntrl implements ng.IController {
         } else {
           if(newWidth >= this.minColWidth) {
             this._tblCols[this.resizeColumn.index].colWidth = newWidth;
-  
             this.resizeColumn = undefined;
           } else {
             this._tblCols[this.resizeColumn.index].colWidth = 20;
@@ -367,7 +353,6 @@ class CommentTblCntrl implements ng.IController {
 
       console.log('saving extension properties');
 
-      console.log(this._model.id)
       this._model.app.getObject(this._model.id).then(extObj =>{
 
         extObj.getProperties().then(extProps => {
@@ -385,24 +370,6 @@ class CommentTblCntrl implements ng.IController {
         })
       })
     }
-    
-
-
-    // dev
-    private savePropsManually() {
-
-      
-      console.log(
-      '  savePropsManually'
-      );
-      this.saveProperties()
-
-      console.log('saving props');
-    }
-
-    // dev
-
-
 
   // ============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touch"];
@@ -410,7 +377,13 @@ class CommentTblCntrl implements ng.IController {
   constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider, private window:ng.IWindowService, private touch:any) {
     
     const that: any = this;
-   
+
+    that.scope.$watch("vm.editMode", (newValue: ElementSize) => {
+
+      console.log(newValue)
+    })
+
+
     // GET USER INFO ============================================= >>>>>>>>>>>
     this.globalObj = that._model.session.app.global;
     this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
@@ -426,22 +399,21 @@ class CommentTblCntrl implements ng.IController {
     body.onscroll = function(e) {
       let bodyScrollPosition = (e.target as any).scrollLeft;
       that.headerWidth = body.clientWidth
+
       headerTableContainer.scrollTo(bodyScrollPosition,0)
       that.scope.$apply();
     }
 
     window.onresize = function (e) {
       e.preventDefault()
-     // headerTableContainer.style.width = body.clientWidth
       that.headerWidth = body.clientWidth
       that.scope.$apply()
     }
 
-    window.onload = function () {
-      //headerTableContainer.style.width = body.clientWidth
+    window.onload = function (e) {
+      e.preventDefault()
       that.headerWidth = body.clientWidth
       that.scope.$apply()
-
     }
    
     // WATCHERS ================================================ >>>>>>>>>>>
@@ -450,15 +422,16 @@ class CommentTblCntrl implements ng.IController {
 
     // ELEMENT SIZE
     that.scope.$watch("vm.getSize()", (newValue: ElementSize) => {
+      that.headerWidth = body.clientWidth
       that.calcCommentColWidth(newValue.width)
-      that.calcTblHeight(newValue.height)
+      that.extHeight = newValue.height
       }, true);
-
 
     // EDIT MODE
     that.scope.$watch("vm._propertiesPanel.commentEditMode", (newValue:boolean) => {
         that.commentEditMode = newValue;
     })
+
   
     // RESIZE COLUMNS ON TOUCHSCREENS
         that.scope.$watch("vm.touch.getWidthChange()", (widthChange) => {
@@ -471,7 +444,6 @@ class CommentTblCntrl implements ng.IController {
              if(index === that.commentColIndex) {
                console.log('setting comment col');
               if(newWidth > that.minColWidthCommentCol) {
-                console.log(newWidth);
                 that._tblCols[index].colWidth = newWidth
 
                 that.touch.resetIndex()
@@ -498,12 +470,10 @@ class CommentTblCntrl implements ng.IController {
          },true)
 
 
-
     // SAVE PROPERTIES ==========================================================================
     window.onbeforeunload = function functionName() {
       console.log('beforeunload');
       that.saveProperties();
-
     }
     
     scope.$on("$destroy", function() {

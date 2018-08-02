@@ -3,14 +3,12 @@
 .hy-directive-container {
     height: 99%;
     width: 99%;
-    padding: 2px;
-
-   // border: 2px solid black;
+    margin-left: auto;
+    margin-right: auto;
     background: #fcfcfc;
+    border: 1px solid black;
 }
 
-// #f7f7f7
-// #fcfcfc
 
 .hy-table {
     width: 100px;
@@ -37,19 +35,18 @@
 
 .hy-table-container--body {
     overflow: auto;
-    height: 95%;
-    border-bottom: 1px solid black;
-    border-left: 1px solid black;
-    border-right: 1px solid black;
+  //  border-left: 1px solid black;
+  //  border-right: 1px solid black;
 }
 
 .hy-table-container--header {
     overflow: hidden;
-    height: 5%;
-    border-top: 1px solid black;
-    border-left: 1px solid black;
+    height: 21px;
+  //  border-top: 1px solid black;
+ //   border-left: 1px solid black;
 
 }
+
 
 // HEADER BLOCK =================================================================
 
@@ -72,7 +69,6 @@
     height: 100%;
     padding-right: 1px;
     background: $hdrFooterColor;
-
 }
 
 .hy-header-item__content-container {
@@ -106,6 +102,18 @@
 // BODY BLOCK ===================================================================
 
 
+.hy-table--body {
+    overflow: hidden;
+    padding-bottom: 10px;
+}
+
+.hy-body {
+    overflow: hidden;
+}
+
+
+
+
 
 .hy-cell {
     border-right: 1px solid black;
@@ -113,7 +121,6 @@
     background: #fff;
     overflow: hidden;
 }
-
 
 
 
