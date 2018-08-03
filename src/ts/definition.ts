@@ -1,4 +1,6 @@
 import * as qlik from "qlik";
+import * as $ from "jquery";
+
 
 // *****************************************************************************
 // Dimensions
@@ -30,6 +32,7 @@ const keyDimensions = {
                 type: "items",
                 label: "dimensions",
                 show: (d) => {
+
                     return d.custom.hideDimKeyRegister.v === false
                 },
                 items: {
@@ -54,56 +57,7 @@ const keyDimensions = {
         min: 0
     }
 
- 
-// *****************************************************************************
-// CONTEXT
-// *****************************************************************************
 
-
-/*
-const contextText = {
-    label: "Please select up to five fields which -in addition to the dimensions in your table-, should also be associated with your comments",
-    component: "text"
-};
-
-
-class ContextDropDown {
-
-    private type:string = 'string';
-    private component: string = 'dropdown';
-    private defaultValue: string = 'None';
-
-    public options(d) {
-        
-        return new Promise((resolve,reject) => {
-            app.getList('FieldList', (fieldlist) => {
-                let dropDownFieldList =  fieldlist.qFieldList.qItems.map(field => {
-                    return {value:field.qName,label:field.qName}
-                })
-                dropDownFieldList.unshift({value:'None',label:'None'})
-                resolve(dropDownFieldList)
-            })
-        }) 
-    }
-    constructor(private label:string, private ref: string) {
-        this.ref = 'custom.context.' + ref;
-    }
-}
-
-const context = {
-    type: "items",
-    label: 'Context',
-    items: {
-        selectionText: contextText,
-        contextDropDownOne: new ContextDropDown('Field One', 'fieldOne'),
-        contextDropDownTwo: new ContextDropDown('Field Two', 'fieldTwo'),
-        contextDropDownThree: new ContextDropDown('Field Three', 'fieldThree'),
-        contextDropDownFour: new ContextDropDown('Field Four', 'fieldFour'),
-        contextDropDownFive: new ContextDropDown('Field Five', 'fieldFive'),
-    }
-}
-
-*/
 
 
 // *****************************************************************************
@@ -124,7 +78,7 @@ const modeSettingsSwitch = {
         value: false,
         label: "View"
     }],
-    defaultValue: false
+    defaultValue: true
 }
 
 
@@ -148,13 +102,10 @@ const appearanceSection = {
 
 const sorting = {
     uses: 'sorting'
-
 };
 
-
-
 // *****************************************************************************
-// Ext settings
+// Settings
 // *****************************************************************************
 
 const keySettingsText = {
@@ -192,16 +143,48 @@ const extSettings = {
                 keySettingsText: keySettingsText,
                 keyDimensionSwitch: keyDimensionSwitch
             }
+        },
+        serviceConfig: {
+            label: "Service Config",
+            type: "items", 
+            items: {
+                serviceUrl: {
+                    ref: "custom.baseUrl",
+                    label: "Api base url:",
+                    type: "string",
+                },
+                connectionTestBtn: {
+                    label:"Test connection",
+                    component: "button",
+                    ref: "custom.connection",
+                    action: function(data){
+                        let baseUrl = data.custom.baseUrl
+
+                       let testUrl = baseUrl + 'test_connection'
+                        $.ajax({
+                            url: testUrl,
+                            type: 'GET',
+                            success: function(){ 
+                                console.log('success')
+                                alert('Success: connection to ' +  baseUrl + ' successfully established')
+                                data.custom.connection = true;
+                            },
+                            error: function() {
+                                alert('Error: Could not establish connection to: ' + baseUrl)
+                                data.custom.connection = false;
+                            }
+                        });
+                    }
+                }
+            }
         }
     }
 }
 
 
-
 // *****************************************************************************
-// About section
+// About
 // *****************************************************************************
-
 
 const aboutText = {
     label: "Copyright 2018 Heyde Schweiz AG",
@@ -228,7 +211,6 @@ const extDefinition = {
         keyDimensions: keyDimensions,
         measures: measures,
         sorting: sorting,
-     //   context: context,
         appearance: appearanceSection,
         extSettings: extSettings,
         about: about

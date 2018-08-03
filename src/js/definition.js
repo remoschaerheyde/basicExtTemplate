@@ -4,12 +4,13 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "qlik"], factory);
+        define(["require", "exports", "qlik", "jquery"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var qlik = require("qlik");
+    var $ = require("jquery");
     // *****************************************************************************
     // Dimensions
     // *****************************************************************************
@@ -49,53 +50,6 @@
         min: 0
     };
     // *****************************************************************************
-    // CONTEXT
-    // *****************************************************************************
-    /*
-    const contextText = {
-        label: "Please select up to five fields which -in addition to the dimensions in your table-, should also be associated with your comments",
-        component: "text"
-    };
-    
-    
-    class ContextDropDown {
-    
-        private type:string = 'string';
-        private component: string = 'dropdown';
-        private defaultValue: string = 'None';
-    
-        public options(d) {
-            
-            return new Promise((resolve,reject) => {
-                app.getList('FieldList', (fieldlist) => {
-                    let dropDownFieldList =  fieldlist.qFieldList.qItems.map(field => {
-                        return {value:field.qName,label:field.qName}
-                    })
-                    dropDownFieldList.unshift({value:'None',label:'None'})
-                    resolve(dropDownFieldList)
-                })
-            })
-        }
-        constructor(private label:string, private ref: string) {
-            this.ref = 'custom.context.' + ref;
-        }
-    }
-    
-    const context = {
-        type: "items",
-        label: 'Context',
-        items: {
-            selectionText: contextText,
-            contextDropDownOne: new ContextDropDown('Field One', 'fieldOne'),
-            contextDropDownTwo: new ContextDropDown('Field Two', 'fieldTwo'),
-            contextDropDownThree: new ContextDropDown('Field Three', 'fieldThree'),
-            contextDropDownFour: new ContextDropDown('Field Four', 'fieldFour'),
-            contextDropDownFive: new ContextDropDown('Field Five', 'fieldFive'),
-        }
-    }
-    
-    */
-    // *****************************************************************************
     // APPEARANCE 
     // *****************************************************************************
     var modeSettingsSwitch = {
@@ -110,7 +64,7 @@
                 value: false,
                 label: "View"
             }],
-        defaultValue: false
+        defaultValue: true
     };
     var appearanceSection = {
         uses: 'settings',
@@ -131,7 +85,7 @@
         uses: 'sorting'
     };
     // *****************************************************************************
-    // Ext settings
+    // Settings
     // *****************************************************************************
     var keySettingsText = {
         label: "Hiding the 'Key Dimensions' window helps to ensure that users don't accidently add or remove dimensions which are needed in order to connect the comments to the data matrix of the extension.",
@@ -164,11 +118,44 @@
                     keySettingsText: keySettingsText,
                     keyDimensionSwitch: keyDimensionSwitch
                 }
+            },
+            serviceConfig: {
+                label: "Service Config",
+                type: "items",
+                items: {
+                    serviceUrl: {
+                        ref: "custom.baseUrl",
+                        label: "Api base url:",
+                        type: "string",
+                    },
+                    connectionTestBtn: {
+                        label: "Test connection",
+                        component: "button",
+                        ref: "custom.connection",
+                        action: function (data) {
+                            var baseUrl = data.custom.baseUrl;
+                            var testUrl = baseUrl + 'test_connection';
+                            $.ajax({
+                                url: testUrl,
+                                type: 'GET',
+                                success: function () {
+                                    console.log('success');
+                                    alert('Success: connection to ' + baseUrl + ' successfully established');
+                                    data.custom.connection = true;
+                                },
+                                error: function () {
+                                    alert('Error: Could not establish connection to: ' + baseUrl);
+                                    data.custom.connection = false;
+                                }
+                            });
+                        }
+                    }
+                }
             }
         }
     };
     // *****************************************************************************
-    // About section
+    // About
     // *****************************************************************************
     var aboutText = {
         label: "Copyright 2018 Heyde Schweiz AG",
@@ -189,7 +176,6 @@
             keyDimensions: keyDimensions,
             measures: measures,
             sorting: sorting,
-            //   context: context,
             appearance: appearanceSection,
             extSettings: extSettings,
             about: about

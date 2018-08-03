@@ -1,8 +1,8 @@
 {
-    "name": "_pgTest",
+    "name": "Heyde Comment",
     "description": "",
     "type": "visualization",
-    "icon": "filterpane",
+    "icon": "table",
     "version": "0.0.1",
     "author": "",
     "homepage": "",

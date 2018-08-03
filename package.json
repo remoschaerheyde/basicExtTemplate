@@ -1,5 +1,5 @@
 {
-  "name": "ser-ext-ondemand",
+  "name": "hy-comment",
   "version": "0.0.1",
   "devDependencies": {
     "@types/angular": "1.6.43",

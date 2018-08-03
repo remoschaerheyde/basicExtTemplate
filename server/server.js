@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors')
 const app = express();
-const PORT = 5000;
+const PORT = 4000;
 
 // body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));

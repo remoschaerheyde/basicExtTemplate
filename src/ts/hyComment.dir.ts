@@ -19,7 +19,7 @@ class CommentTblCntrl implements ng.IController {
   private textAreaComment:string;
   private _dimensionsInfo: any;
   private _genericObjectId: string;
-  private apiCommentRoute:string = 'http://localhost:5000/api/comments/';
+  private apiCommentRoute:string;
   private tblHeaderHeight: number;
   private tblBodyHeight: number;
   private tblFooterHeight: number;
@@ -33,6 +33,7 @@ class CommentTblCntrl implements ng.IController {
   private minColWidthCommentCol:number = 300;
   private resizeColumn:{width:number, index: number, cursorStartPosition: number};
   private extHeight:number;
+  private error: {showError: boolean, msg:string};
 
   public get dimensionsInfo(): any {
     return this._dimensionsInfo;
@@ -106,6 +107,7 @@ class CommentTblCntrl implements ng.IController {
 
     let extId = this._model.id
 
+    console.log(this.apiCommentRoute + "get_all")
     this.http({
       url: this.apiCommentRoute + "get_all",
       method: "POST",
@@ -181,20 +183,15 @@ class CommentTblCntrl implements ng.IController {
           genObj.getProperties().then(genObjProps => {
 
             if(genObjProps.hyTblCols) {
-
-              console.log(genObjProps.hyTblCols)
               let savedIds = genObjProps.hyTblCols.map(col => col.cId).toString()
               let cubeIds = tblCols.map(col => col.cId).toString()
   
               if(savedIds === cubeIds) {
-                console.log('1')
                 this._tblCols = genObjProps.hyTblCols
               } else {
-                console.log('2')
                 this._tblCols = tblCols
               }
             } else {
-              console.log('3')
               this._tblCols = tblCols
             }
           }).catch(err => console.log('could not get gen obj props', err))
@@ -257,20 +254,15 @@ class CommentTblCntrl implements ng.IController {
   // ================== API CALLS =======================================//
   private addOrUpdateComment = function(row:EngineAPI.INxCellRows) {
 
-    //this.getAppSelections().then(selections => {
+    let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id)
 
-      let newComment = new Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id)
-
-      this.http({
-        url: this.apiCommentRoute +  "add_new_comment",
-        method: "POST",
-        data: { newComment: JSON.stringify(newComment) },
+    this.http({
+      url: this.apiCommentRoute +  "add_new_comment",
+      method: "POST",
+      data: { newComment: JSON.stringify(newComment) },
         headers: { "Content-Type": "application/json" }
-      }).then(res => this._model.emit("changed")
-      ).catch(err => console.log('could not add new comment',err))
-
-    //}).catch(err => console.log('could not get app selections', err))
-
+    }).then(res => this._model.emit("changed")
+    ).catch(err => console.log('could not add new comment',err))
   }
 
   private deleteComment = function(row:EngineAPI.INxCellRows) { 
@@ -306,15 +298,11 @@ class CommentTblCntrl implements ng.IController {
       }
     }
 
-   
-
-
     private initGuiVars() {
       this.calcCommentColWidth(this.element.width())
       this.showEditForCell = -1;
       this.textAreaComment = "";
     }
-
 
     private resizeStart(event, index) {     
       let width = this._tblCols[index].colWidth
@@ -325,7 +313,6 @@ class CommentTblCntrl implements ng.IController {
     private resizeEnd(event) {
       if(this.resizeColumn) {
         let resizeEnd = event.clientX;
-
         let headerElementStartPosition = (this.resizeColumn.cursorStartPosition - this.resizeColumn.width);
         let newWidth = resizeEnd - headerElementStartPosition;
 
@@ -350,22 +337,16 @@ class CommentTblCntrl implements ng.IController {
     }
 
     private saveProperties() {
-
-      console.log('saving extension properties');
-
       this._model.app.getObject(this._model.id).then(extObj =>{
-
         extObj.getProperties().then(extProps => {
           let newProperties = extProps
 
           // ADD PROPERTIES HERE ============>>
-
           newProperties.hyTblCols = this._tblCols;
 
           extObj.setProperties(newProperties)
           .then(() => {
             extObj.getLayout().then(layout => console.log(layout))
-          
           })
         })
       })
@@ -378,18 +359,11 @@ class CommentTblCntrl implements ng.IController {
     
     const that: any = this;
 
-    that.scope.$watch("vm.editMode", (newValue: ElementSize) => {
-
-      console.log(newValue)
-    })
-
-
     // GET USER INFO ============================================= >>>>>>>>>>>
     this.globalObj = that._model.session.app.global;
     this.globalObj.getAuthenticatedUser().then(user => (this.user = user));
 
     // SCROLLBARS ================================================ >>>>>>>>>>>
-
     let header:any = this.element.children()[0]
     let headerTableContainer = header.children[0]
     let body:any = this.element.children()[1]
@@ -398,9 +372,8 @@ class CommentTblCntrl implements ng.IController {
 
     body.onscroll = function(e) {
       let bodyScrollPosition = (e.target as any).scrollLeft;
-      that.headerWidth = body.clientWidth
-
-      headerTableContainer.scrollTo(bodyScrollPosition,0)
+      that.headerWidth = body.clientWidth;
+      headerTableContainer.scrollTo(bodyScrollPosition,0);
       that.scope.$apply();
     }
 
@@ -417,6 +390,22 @@ class CommentTblCntrl implements ng.IController {
     }
    
     // WATCHERS ================================================ >>>>>>>>>>>
+    that.scope.$watch("vm._model.layout.custom.baseUrl", (newUrl:string, oldUrl:string) => { 
+      if(newUrl === '') {
+        that.$scope.$apply()
+      } else {
+        that.apiCommentRoute = newUrl
+        that.$scope.$apply()
+      }
+    })
+
+    console.log(this)
+    that.scope.$watch("vm._model.layout.custom.connection", (connectionState) => { 
+
+      console.log('state changed')
+      console.log(connectionState)
+    })
+
 
     this._propertiesPanel = that._model.layout.custom
 
@@ -432,9 +421,11 @@ class CommentTblCntrl implements ng.IController {
         that.commentEditMode = newValue;
     })
 
+
+
   
     // RESIZE COLUMNS ON TOUCHSCREENS
-        that.scope.$watch("vm.touch.getWidthChange()", (widthChange) => {
+    that.scope.$watch("vm.touch.getWidthChange()", (widthChange) => {
           let index = that.touch.getIndex()
     
           if(typeof widthChange !== 'undefined' && typeof index !== 'undefined') {

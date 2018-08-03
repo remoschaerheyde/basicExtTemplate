@@ -22,7 +22,6 @@
             this.window = window;
             this.touch = touch;
             this.stringSeperator = '||&||';
-            this.apiCommentRoute = 'http://localhost:5000/api/comments/';
             this.minColWidth = 20;
             this.minColWidthCommentCol = 300;
             // ================== Set the data of the session object ================================//
@@ -30,6 +29,7 @@
                 var _this = this;
                 var comments = customHyperCubeLayout.qHyperCube.hyRowKeys;
                 var extId = this._model.id;
+                console.log(this.apiCommentRoute + "get_all");
                 this.http({
                     url: this.apiCommentRoute + "get_all",
                     method: "POST",
@@ -53,7 +53,6 @@
             };
             // ================== API CALLS =======================================//
             this.addOrUpdateComment = function (row) {
-                //this.getAppSelections().then(selections => {
                 var _this = this;
                 var newComment = new commentClass_1.Comment(this.createDimKey(row), this.user, this.textAreaComment, this._dimensionsInfo, this._model.id);
                 this.http({
@@ -62,7 +61,6 @@
                     data: { newComment: JSON.stringify(newComment) },
                     headers: { "Content-Type": "application/json" }
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not add new comment', err); });
-                //}).catch(err => console.log('could not get app selections', err))
             };
             this.deleteComment = function (row) {
                 var _this = this;
@@ -76,9 +74,6 @@
                 }).then(function (res) { return _this._model.emit("changed"); }).catch(function (err) { return console.log('could not delete comment', err); });
             };
             var that = this;
-            that.scope.$watch("vm.editMode", function (newValue) {
-                console.log(newValue);
-            });
             // GET USER INFO ============================================= >>>>>>>>>>>
             this.globalObj = that._model.session.app.global;
             this.globalObj.getAuthenticatedUser().then(function (user) { return (_this.user = user); });
@@ -104,6 +99,20 @@
                 that.scope.$apply();
             };
             // WATCHERS ================================================ >>>>>>>>>>>
+            that.scope.$watch("vm._model.layout.custom.baseUrl", function (newUrl, oldUrl) {
+                if (newUrl === '') {
+                    that.$scope.$apply();
+                }
+                else {
+                    that.apiCommentRoute = newUrl;
+                    that.$scope.$apply();
+                }
+            });
+            console.log(this);
+            that.scope.$watch("vm._model.layout.custom.connection", function (connectionState) {
+                console.log('state changed');
+                console.log(connectionState);
+            });
             this._propertiesPanel = that._model.layout.custom;
             // ELEMENT SIZE
             that.scope.$watch("vm.getSize()", function (newValue) {
@@ -276,20 +285,16 @@
                 this._model.app.getObject(this._model.id).then(function (genObj) {
                     genObj.getProperties().then(function (genObjProps) {
                         if (genObjProps.hyTblCols) {
-                            console.log(genObjProps.hyTblCols);
                             var savedIds = genObjProps.hyTblCols.map(function (col) { return col.cId; }).toString();
                             var cubeIds = tblCols_1.map(function (col) { return col.cId; }).toString();
                             if (savedIds === cubeIds) {
-                                console.log('1');
                                 _this._tblCols = genObjProps.hyTblCols;
                             }
                             else {
-                                console.log('2');
                                 _this._tblCols = tblCols_1;
                             }
                         }
                         else {
-                            console.log('3');
                             _this._tblCols = tblCols_1;
                         }
                     }).catch(function (err) { return console.log('could not get gen obj props', err); });
@@ -397,7 +402,6 @@
         };
         CommentTblCntrl.prototype.saveProperties = function () {
             var _this = this;
-            console.log('saving extension properties');
             this._model.app.getObject(this._model.id).then(function (extObj) {
                 extObj.getProperties().then(function (extProps) {
                     var newProperties = extProps;

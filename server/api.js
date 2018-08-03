@@ -4,6 +4,13 @@ const pg = require('pg');
 const poolConfig = require('./dbConfig').poolConfig;
 const dbTable = require('./dbConfig').dbTable;
 
+// TEST CONNECTION
+router.get('/comments/test_connection', (req,res) => {
+    res.status(200).send('Connection test succesfull')
+ })
+
+
+
 // UPDATE MODEL
 router.post('/comments/get_all', (req,res) => {
     let pool = new pg.Pool(poolConfig)
