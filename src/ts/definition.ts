@@ -9,8 +9,6 @@ import * as $ from "jquery";
 let app = qlik.currApp();
 
 
-
-
 const dimText = {
         label: function(d) {
             return  d.custom.hideDimKeyRegister.text

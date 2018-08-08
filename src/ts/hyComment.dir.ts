@@ -374,19 +374,25 @@ class CommentTblCntrl implements ng.IController {
       let bodyScrollPosition = (e.target as any).scrollLeft;
       that.headerWidth = body.clientWidth;
       headerTableContainer.scrollTo(bodyScrollPosition,0);
+      if(that.$scope) {
       that.scope.$apply();
+      }
     }
 
     window.onresize = function (e) {
       e.preventDefault()
       that.headerWidth = body.clientWidth
+      if(that.$scope) {
       that.scope.$apply()
+      }
     }
 
     window.onload = function (e) {
       e.preventDefault()
       that.headerWidth = body.clientWidth
+      if(that.$scope) {
       that.scope.$apply()
+      }
     }
    
     // WATCHERS ================================================ >>>>>>>>>>>
@@ -395,16 +401,13 @@ class CommentTblCntrl implements ng.IController {
         that.$scope.$apply()
       } else {
         that.apiCommentRoute = newUrl
-        that.$scope.$apply()
+        if(that.$scope) {
+          that.$scope.$apply()
+        }
+    
       }
     })
 
-    console.log(this)
-    that.scope.$watch("vm._model.layout.custom.connection", (connectionState) => { 
-
-      console.log('state changed')
-      console.log(connectionState)
-    })
 
 
     this._propertiesPanel = that._model.layout.custom
@@ -456,7 +459,9 @@ class CommentTblCntrl implements ng.IController {
               }
             }
             that.headerWidth = body.clientWidth
+            if(that.$scope) {
             that.$scope.$apply()
+            }
           }
          },true)
 

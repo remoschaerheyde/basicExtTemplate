@@ -22,5 +22,17 @@
         }
     }
     exports.registerDirective = registerDirective;
+    var RegistrationProvider = /** @class */ (function () {
+        function RegistrationProvider() {
+        }
+        //#endregion
+        RegistrationProvider.prototype.implementObject = function (object) {
+            this.directive = object.directive ? object.directive : null;
+            this.filter = object.filter ? object.filter : null;
+            this.service = object.service ? object.service : null;
+        };
+        return RegistrationProvider;
+    }());
+    exports.RegistrationProvider = RegistrationProvider;
 });
 //# sourceMappingURL=ngRegister.js.map

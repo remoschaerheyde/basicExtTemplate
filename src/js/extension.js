@@ -4,7 +4,7 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "qvangular", "qlik", "text!../templates/extension.html", "./hyComment.dir", "../../node_modules/davinci.js/dist/umd/daVinci", "./ngRegister", "./definition", "./initProps", "./services/touch.ser", "./directives/touch.dir"], factory);
+        define(["require", "exports", "qvangular", "qlik", "text!../templates/extension.html", "./hyComment.dir", "./ngRegister", "./definition", "./initProps", "./services/touch.ser", "./directives/touch.dir", "./ngRegister", "./qsGeneric"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -13,14 +13,15 @@
     var qlik = require("qlik");
     var template = require("text!../templates/extension.html");
     var hyComment_dir_1 = require("./hyComment.dir");
-    var daVinci_1 = require("../../node_modules/davinci.js/dist/umd/daVinci");
+    //import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci";
     var ngRegister_1 = require("./ngRegister");
     var definition_1 = require("./definition");
     var initProps_1 = require("./initProps");
     var touch_ser_1 = require("./services/touch.ser");
     var touch_dir_1 = require("./directives/touch.dir");
-    // SERVICES ===============================================================================
-    qvangular.service("$registrationProvider", daVinci_1.services.RegistrationProvider).implementObject(qvangular);
+    var ngRegister_2 = require("./ngRegister");
+    var qsGeneric_1 = require("./qsGeneric");
+    qvangular.service("$registrationProvider", ngRegister_2.RegistrationProvider).implementObject(qvangular);
     qvangular.service('£touch', touch_ser_1.TouchService);
     // DIRECTIVES ===============================================================================
     ngRegister_1.registerDirective(qvangular, hyComment_dir_1.ExampleDirectiveFactory(), "hyComment");
@@ -45,8 +46,8 @@
         initialProperties: initProps_1.default,
         template: template,
         controller: ["$scope", function (scope) {
-                scope.vm = new ExampleExtension(daVinci_1.utils.getEnigma(scope));
-                scope.touchCntrl = new ExampleExtension(daVinci_1.utils.getEnigma(scope));
+                scope.vm = new ExampleExtension(qsGeneric_1.getEnigma(scope));
+                scope.touchCntrl = new ExampleExtension(qsGeneric_1.getEnigma(scope));
             }]
     };
 });

@@ -86,17 +86,23 @@
                 var bodyScrollPosition = e.target.scrollLeft;
                 that.headerWidth = body.clientWidth;
                 headerTableContainer.scrollTo(bodyScrollPosition, 0);
-                that.scope.$apply();
+                if (that.$scope) {
+                    that.scope.$apply();
+                }
             };
             window.onresize = function (e) {
                 e.preventDefault();
                 that.headerWidth = body.clientWidth;
-                that.scope.$apply();
+                if (that.$scope) {
+                    that.scope.$apply();
+                }
             };
             window.onload = function (e) {
                 e.preventDefault();
                 that.headerWidth = body.clientWidth;
-                that.scope.$apply();
+                if (that.$scope) {
+                    that.scope.$apply();
+                }
             };
             // WATCHERS ================================================ >>>>>>>>>>>
             that.scope.$watch("vm._model.layout.custom.baseUrl", function (newUrl, oldUrl) {
@@ -105,13 +111,10 @@
                 }
                 else {
                     that.apiCommentRoute = newUrl;
-                    that.$scope.$apply();
+                    if (that.$scope) {
+                        that.$scope.$apply();
+                    }
                 }
-            });
-            console.log(this);
-            that.scope.$watch("vm._model.layout.custom.connection", function (connectionState) {
-                console.log('state changed');
-                console.log(connectionState);
             });
             this._propertiesPanel = that._model.layout.custom;
             // ELEMENT SIZE
@@ -153,7 +156,9 @@
                         }
                     }
                     that.headerWidth = body.clientWidth;
-                    that.$scope.$apply();
+                    if (that.$scope) {
+                        that.$scope.$apply();
+                    }
                 }
             }, true);
             // SAVE PROPERTIES ==========================================================================
