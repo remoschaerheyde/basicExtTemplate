@@ -3,7 +3,6 @@ function registerDirective(dirRegister:IQVAngular, dirFactory:angular.IDirective
 
     try {
         if (!injector.has(directiveName + "Directive")) {
-            console.log('registring directive as:', directiveName);
             dirRegister.directive(directiveName, dirFactory);
         }
     }

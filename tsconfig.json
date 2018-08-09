@@ -10,7 +10,7 @@
       "./src/.sass-cache"
     ],
     "compilerOptions": {
-      "module": "umd",
+ //     "module": "umd",
       "noEmitOnError": true,
       "noImplicitAny": false,
       "removeComments": false,

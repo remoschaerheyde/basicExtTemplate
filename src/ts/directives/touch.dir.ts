@@ -42,28 +42,24 @@ class TouchController implements ng.IController {
                 let widthChange =  touchEnd - touchStart
 
                 that.touch.setWidthChange(widthChange)
-                console.log(that);
                 that.touch.setIndex(that.index)
-                that.scope.$apply();
-
+                if(that.scope) {
+                    that.scope.$apply();
+                }
                 that.touchTrack = [];
 
             } else {
                 console.log('no value for touchstart');
             }
-
-
         })
-
-
-
-     
     }
   }
   
   export function TouchFactory(): ng.IDirectiveFactory {
     "use strict";
-    return ($document: ng.IAugmentedJQuery, $injector: ng.auto.IInjectorService, $registrationProvider: any) => {
+    return (
+    //    $document: ng.IAugmentedJQuery, $injector: ng.auto.IInjectorService, $registrationProvider: any
+    ) => {
       return {
         restrict: "A",
         replace: true,

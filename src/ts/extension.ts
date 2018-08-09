@@ -1,9 +1,7 @@
-//#region Imports
 import * as qvangular from "qvangular";
 import * as qlik from "qlik";
 import * as template from "text!../templates/extension.html";
-import { ExampleDirectiveFactory } from "./hyComment.dir";
-//import { utils, services } from "../../node_modules/davinci.js/dist/umd/daVinci";
+import { CommentDirectiveFactory } from "./hyComment.dir";
 import {registerDirective} from "./ngRegister";
 import extDefinition from "./definition";
 import initProps from "./initProps";
@@ -12,14 +10,13 @@ import {TouchFactory} from "./directives/touch.dir";
 import {RegistrationProvider,IRegistrationProvider} from "./ngRegister";
 import {getEnigma} from "./qsGeneric";
 
+// SERVICE REGISTRATION ===============================================================================
 qvangular.service<IRegistrationProvider>("$registrationProvider", RegistrationProvider).implementObject(qvangular);
 qvangular.service<IRegistrationProvider>('£touch',TouchService);
 
-// DIRECTIVES ===============================================================================
-registerDirective(qvangular, ExampleDirectiveFactory(), "hyComment")
+// DIRECTIVE REGISTRATION ===============================================================================
+registerDirective(qvangular, CommentDirectiveFactory(), "hyComment")
 registerDirective(qvangular, TouchFactory(), "ngTouch")
-
-const $injector = qvangular.$injector;
 
 class ExampleExtension {
     model: EngineAPI.IGenericObject;
@@ -46,5 +43,3 @@ export = {
         (scope as any).touchCntrl = new ExampleExtension(getEnigma(scope));
     }]
 };
-
-

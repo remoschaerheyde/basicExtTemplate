@@ -1,11 +1,9 @@
 import * as template from "text!../templates/hyComment.html";
-import "css!../css/main.css";
 import "./customInterfaces"
 import {Comment} from './commentClass';
-
+import "../scss/main.scss";
 
 class CommentTblCntrl implements ng.IController {
-
   private _model: EngineAPI.IGenericObject;
   private _hyperCubeDef: EngineAPI.IGenericObjectProperties;
   private globalObj: any;
@@ -101,13 +99,13 @@ class CommentTblCntrl implements ng.IController {
     }
   }
 
+
   // ================== Set the data of the session object ================================//
   private getDbComments = function(customHyperCubeLayout) {
     let comments =  customHyperCubeLayout.qHyperCube.hyRowKeys
 
     let extId = this._model.id
 
-    console.log(this.apiCommentRoute + "get_all")
     this.http({
       url: this.apiCommentRoute + "get_all",
       method: "POST",
@@ -352,10 +350,12 @@ class CommentTblCntrl implements ng.IController {
       })
     }
 
-  // ============================== injector / Constructor ======================================================
+  //============================== injector / Constructor ======================================================
   static $inject = ["$timeout", "$element", "$scope", "$http", "$window", "£touch"];
 
-  constructor(timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider, private window:ng.IWindowService, private touch:any) {
+  constructor(
+   timeout: ng.ITimeoutService, private element: JQuery, private scope: ng.IScope, private http: ng.IHttpProvider, private window:ng.IWindowService, private touch:any
+  ) {
     
     const that: any = this;
 
@@ -375,7 +375,7 @@ class CommentTblCntrl implements ng.IController {
       that.headerWidth = body.clientWidth;
       headerTableContainer.scrollTo(bodyScrollPosition,0);
       if(that.$scope) {
-      that.scope.$apply();
+        that.scope.$apply();
       }
     }
 
@@ -383,7 +383,7 @@ class CommentTblCntrl implements ng.IController {
       e.preventDefault()
       that.headerWidth = body.clientWidth
       if(that.$scope) {
-      that.scope.$apply()
+        that.scope.$apply()
       }
     }
 
@@ -391,14 +391,16 @@ class CommentTblCntrl implements ng.IController {
       e.preventDefault()
       that.headerWidth = body.clientWidth
       if(that.$scope) {
-      that.scope.$apply()
+        that.scope.$apply()
       }
     }
    
     // WATCHERS ================================================ >>>>>>>>>>>
     that.scope.$watch("vm._model.layout.custom.baseUrl", (newUrl:string, oldUrl:string) => { 
       if(newUrl === '') {
-        that.$scope.$apply()
+        if(that.$scope) {
+          that.$scope.$apply()
+        }
       } else {
         that.apiCommentRoute = newUrl
         if(that.$scope) {
@@ -460,7 +462,7 @@ class CommentTblCntrl implements ng.IController {
             }
             that.headerWidth = body.clientWidth
             if(that.$scope) {
-            that.$scope.$apply()
+              that.$scope.$apply()
             }
           }
          },true)
@@ -479,12 +481,15 @@ class CommentTblCntrl implements ng.IController {
       
       that.destroySessionObject();
     });
-  }
+   }
 }
 
-export function ExampleDirectiveFactory(): ng.IDirectiveFactory {
+
+export function CommentDirectiveFactory(): ng.IDirectiveFactory {
   "use strict";
-  return ($document: ng.IAugmentedJQuery, $injector: ng.auto.IInjectorService, $registrationProvider: any) => {
+  return (
+  //  $document: ng.IAugmentedJQuery, $injector: ng.auto.IInjectorService, $registrationProvider: any
+  ) => {
     return {
       restrict: "E",
       replace: true,

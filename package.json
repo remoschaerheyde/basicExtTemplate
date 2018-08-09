@@ -6,12 +6,32 @@
     "@types/jquery": "1.10.34",
     "@types/qlik-engineapi": "12.67.0",
     "@types/qlik-visualizationextensions": "4.0.2",
-    "typescript": "^2.8.1"
+    "autoprefixer": "^9.1.0",
+    "clean-webpack-plugin": "^0.1.19",
+    "copy-webpack-plugin": "^4.5.2",
+    "css-loader": "^1.0.0",
+    "cssnano": "^4.0.5",
+    "node-sass": "^4.9.2",
+    "postcss-class-prefix": "^0.3.0",
+    "postcss-import": "^12.0.0",
+    "postcss-loader": "^3.0.0",
+    "postcss-preset-env": "^5.3.0",
+    "raw-loader": "^0.5.1",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.22.1",
+    "sugarss": "^1.0.1",
+    "ts-loader": "^4.4.2",
+    "typescript": "^2.9.2",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0"
   },
-  "dependencies": {},
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "tsc -p tsconfig.json",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "build:prod": "webpack --config=webpack.production.config.js --mode production",
+    "build:dev": "webpack --config=webpack.development.config.js --mode=development",
+    "watch": "webpack --watch --config=webpack.development.config.js --mode=development"
   }
 }
