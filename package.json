@@ -19,7 +19,6 @@
     "raw-loader": "^0.5.1",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.22.1",
-    "sugarss": "^1.0.1",
     "ts-loader": "^4.4.2",
     "typescript": "^2.9.2",
     "uglifyjs-webpack-plugin": "^1.2.7",
@@ -30,7 +29,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "tsc -p tsconfig.json",
     "start": "nodemon server.js",
-    "build:prod": "webpack --config=webpack.production.config.js --mode production",
+    "build:prod": "webpack --config=webpack.production.config.js --mode=production",
     "build:dev": "webpack --config=webpack.development.config.js --mode=development",
     "watch": "webpack --watch --config=webpack.development.config.js --mode=development"
   }

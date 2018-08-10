@@ -1,5 +1,4 @@
 module.exports = {
-  //  parser: 'sugarss',
     plugins: {
       'postcss-import': {},
       'postcss-preset-env': {
@@ -12,7 +11,5 @@ module.exports = {
                 },
           }]
       }
-      //,
-    //  autoprefixer: { browsers: ['last 4 versions', 'iOS >= 8'] }
     }
   }
