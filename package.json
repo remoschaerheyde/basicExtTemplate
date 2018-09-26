@@ -1,5 +1,5 @@
 {
-  "name": "hy-comment",
+  "name": "hy-sensor-extension",
   "version": "0.0.1",
   "devDependencies": {
     "@types/angular": "1.6.43",

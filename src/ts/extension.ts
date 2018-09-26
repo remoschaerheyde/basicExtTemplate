@@ -1,22 +1,22 @@
 import * as qvangular from "qvangular";
 import * as qlik from "qlik";
 import * as template from "text!../templates/extension.html";
-import { CommentDirectiveFactory } from "./hyComment.dir";
+import {mainDirectiveFactory} from "./main.dir";
 import {registerDirective} from "./ngRegister";
 import extDefinition from "./definition";
 import initProps from "./initProps";
-import {TouchService} from "./services/touch.ser";
-import {TouchFactory} from "./directives/touch.dir";
+//import {CustomService} from "./services/custom.ser";
+//import {CustomFactory} from "./directives/custom.dir";
 import {RegistrationProvider,IRegistrationProvider} from "./ngRegister";
 import {getEnigma} from "./qsGeneric";
 
 // SERVICE REGISTRATION ===============================================================================
 qvangular.service<IRegistrationProvider>("$registrationProvider", RegistrationProvider).implementObject(qvangular);
-qvangular.service<IRegistrationProvider>('£touch',TouchService);
+//qvangular.service<IRegistrationProvider>('£custom',CustomService);
 
 // DIRECTIVE REGISTRATION ===============================================================================
-registerDirective(qvangular, CommentDirectiveFactory(), "hyComment")
-registerDirective(qvangular, TouchFactory(), "ngTouch")
+registerDirective(qvangular, mainDirectiveFactory(), "hySensorExtension")
+//registerDirective(qvangular, CustomFactory(), "ngCustom")
 
 class ExampleExtension {
     model: EngineAPI.IGenericObject;
