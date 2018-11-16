@@ -2,7 +2,6 @@ const path = require('path');
 const packageDotJson = require('./package.json');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const extName = packageDotJson.name
 const deploymentPath = path.resolve(`${process.env.USERPROFILE}/Documents/Qlik/Sense/Extensions/${extName}`);
@@ -27,8 +26,8 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(deploymentPath, { allowExternal: true } ),
         new CopyWebpackPlugin([
-            {from: `${extName}.qext`, to: `${deploymentPath}/${extName}.qext`},
-            {from: `${extName}.js`, to: `${deploymentPath}/${extName}.js`},
+            {from: `main.qext`, to: `${deploymentPath}/${extName}.qext`},
+            {from: `main.js`, to: `${deploymentPath}/${extName}.js`},
             {from: `wbfolder.wbl`, to: `${deploymentPath}/wbfolder.wbl`}
         ])
     ],

@@ -26,8 +26,8 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(deploymentPath, { allowExternal: true } ),
         new CopyWebpackPlugin([
-            {from: `${extName}.qext`, to: `${deploymentPath}/${extName}.qext`},
-            {from: `${extName}.js`, to: `${deploymentPath}/${extName}.js`},
+            {from: `main.qext`, to: `${deploymentPath}/${extName}.qext`},
+            {from: `main.js`, to: `${deploymentPath}/${extName}.js`},
             {from: `wbfolder.wbl`, to: `${deploymentPath}/wbfolder.wbl`}
 
         ]),
